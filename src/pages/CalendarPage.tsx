@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { FilterPanel } from "@/components/FilterPanel";
 import { CalendarView } from "@/components/CalendarView";
+import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { olympiadsData, Subject, Grade, Scale } from "@/data/olympiads";
 
@@ -52,6 +53,7 @@ const CalendarPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <UpcomingReminder />
       
       <main className="container py-8">
         <div className="mb-6 animate-fade-in">

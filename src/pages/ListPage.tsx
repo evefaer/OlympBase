@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { FilterPanel } from "@/components/FilterPanel";
 import { OlympiadCard } from "@/components/OlympiadCard";
+import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { olympiadsData, Subject, Grade, Scale } from "@/data/olympiads";
 import { parseISO, isWithinInterval, isAfter, isBefore } from "date-fns";
@@ -78,6 +79,7 @@ const ListPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <UpcomingReminder />
       
       <main className="container py-8">
         <div className="mb-6 animate-fade-in">
