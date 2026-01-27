@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Calendar, List, Star, Rocket } from "lucide-react";
 import { Header } from "@/components/Header";
+import { UpcomingReminder } from "@/components/UpcomingReminder";
 
 const features = [
   {
@@ -30,6 +31,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <UpcomingReminder />
       
       <main className="container py-16">
         {/* Hero Section */}
