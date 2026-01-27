@@ -15,12 +15,21 @@ const ListPage = () => {
     from: undefined,
     to: undefined,
   });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData
       .filter((olympiad) => {
+        // Filter by search query
+        if (searchQuery.trim()) {
+          const query = searchQuery.toLowerCase();
+          if (!olympiad.title.toLowerCase().includes(query)) {
+            return false;
+          }
+        }
+
         // Filter by selected
         if (showOnlySelected && !isSelected(olympiad.id)) {
           return false;
@@ -64,7 +73,7 @@ const ListPage = () => {
         return true;
       })
       .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
-  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, dateRange, isSelected]);
+  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, dateRange, searchQuery, isSelected]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,6 +102,8 @@ const ListPage = () => {
           showDateRange
           dateRange={dateRange}
           onDateRangeChange={setDateRange}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
 
         {filteredOlympiads.length > 0 ? (

@@ -11,6 +11,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
+import { SearchInput } from "@/components/SearchInput";
 
 interface FilterPanelProps {
   selectedSubjects: Subject[];
@@ -25,6 +26,8 @@ interface FilterPanelProps {
   showDateRange?: boolean;
   dateRange?: { from: Date | undefined; to: Date | undefined };
   onDateRangeChange?: (range: { from: Date | undefined; to: Date | undefined }) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export function FilterPanel({
@@ -40,6 +43,8 @@ export function FilterPanel({
   showDateRange = false,
   dateRange,
   onDateRangeChange,
+  searchQuery = "",
+  onSearchChange,
 }: FilterPanelProps) {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
 
@@ -74,16 +79,27 @@ export function FilterPanel({
     if (onDateRangeChange) {
       onDateRangeChange({ from: undefined, to: undefined });
     }
+    if (onSearchChange) {
+      onSearchChange("");
+    }
   };
 
   const hasFilters =
     selectedSubjects.length > 0 ||
     selectedGrades.length > 0 ||
     selectedScales.length > 0 ||
-    (dateRange?.from || dateRange?.to);
+    (dateRange?.from || dateRange?.to) ||
+    searchQuery.trim().length > 0;
 
   return (
     <div className="bg-card rounded-xl border border-border p-4 mb-6 animate-fade-in">
+      {/* Search Input */}
+      {onSearchChange && (
+        <div className="mb-4">
+          <SearchInput value={searchQuery} onChange={onSearchChange} />
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <div className="flex items-center gap-2 text-muted-foreground">
           <Filter className="w-4 h-4" />
