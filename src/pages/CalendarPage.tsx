@@ -10,11 +10,20 @@ const CalendarPage = () => {
   const [selectedGrades, setSelectedGrades] = useState<Grade[]>([]);
   const [selectedScales, setSelectedScales] = useState<Scale[]>([]);
   const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData.filter((olympiad) => {
+      // Filter by search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        if (!olympiad.title.toLowerCase().includes(query)) {
+          return false;
+        }
+      }
+
       // Filter by selected
       if (showOnlySelected && !isSelected(olympiad.id)) {
         return false;
@@ -38,7 +47,7 @@ const CalendarPage = () => {
 
       return true;
     });
-  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, isSelected]);
+  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, searchQuery, isSelected]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,6 +73,8 @@ const CalendarPage = () => {
           showOnlySelected={showOnlySelected}
           onShowOnlySelectedChange={setShowOnlySelected}
           selectedCount={selectedCount}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
 
         <CalendarView
