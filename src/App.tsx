@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import CalendarPage from "./pages/CalendarPage";
 import ListPage from "./pages/ListPage";
+import OlympiadPage from "./pages/OlympiadPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,10 +20,11 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/list" element={<ListPage />} />
-            <Route path="*" element={<NotFound />} />
+          <Route path="/" element={<Index />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/list" element={<ListPage />} />
+          <Route path="/olympiad/:id" element={<OlympiadPage />} />
+          <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
