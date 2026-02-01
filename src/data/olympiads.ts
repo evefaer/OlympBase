@@ -25,6 +25,10 @@ export interface Olympiad {
   description: string;
   registrationDeadline: string;
   website?: string;
+  requirements?: string[];
+  organizer?: string;
+  format?: "Онлайн" | "Очный" | "Смешанный";
+  prizes?: string[];
 }
 
 export const SUBJECTS: Subject[] = [
@@ -72,8 +76,13 @@ export const olympiadsData: Olympiad[] = [
     scale: "Всероссийская",
     startDate: "2026-01-15",
     endDate: "2026-01-15",
-    description: "Школьный этап Всероссийской олимпиады по математике",
+    description: "Школьный этап Всероссийской олимпиады по математике. Олимпиада проводится ежегодно и включает несколько этапов.",
     registrationDeadline: "2026-01-10",
+    website: "https://vserosolymp.rusolymp.ru/",
+    requirements: ["Обучение в общеобразовательной школе", "Соответствие возрастной категории", "Регистрация на сайте олимпиады"],
+    organizer: "Министерство просвещения РФ",
+    format: "Очный",
+    prizes: ["Диплом победителя", "Льготы при поступлении в вузы", "Денежные премии для победителей"],
   },
   {
     id: "2",
@@ -83,8 +92,13 @@ export const olympiadsData: Olympiad[] = [
     scale: "Всероссийская",
     startDate: "2026-01-20",
     endDate: "2026-01-20",
-    description: "Отборочный этап олимпиады МФТИ",
+    description: "Отборочный этап олимпиады МФТИ. Одна из престижных олимпиад по физике в России.",
     registrationDeadline: "2026-01-15",
+    website: "https://olymp.mipt.ru/",
+    requirements: ["Учащиеся 10-11 классов", "Онлайн-регистрация обязательна"],
+    organizer: "МФТИ",
+    format: "Смешанный",
+    prizes: ["Диплом I, II, III степени", "Льготы при поступлении в МФТИ"],
   },
   {
     id: "3",

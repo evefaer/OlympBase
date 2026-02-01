@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Star, Calendar, Users, MapPin } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -29,7 +30,11 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect }: OlympiadC
           </span>
         </div>
         <button
-          onClick={() => onToggleSelect(olympiad.id)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleSelect(olympiad.id);
+          }}
           className={cn(
             "p-1.5 rounded-lg transition-all",
             isSelected
@@ -42,9 +47,11 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect }: OlympiadC
         </button>
       </div>
 
-      <h3 className="font-semibold text-foreground mb-2 leading-tight group-hover:text-primary transition-colors">
-        {olympiad.title}
-      </h3>
+      <Link to={`/olympiad/${olympiad.id}`}>
+        <h3 className="font-semibold text-foreground mb-2 leading-tight group-hover:text-primary transition-colors cursor-pointer">
+          {olympiad.title}
+        </h3>
+      </Link>
 
       <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
         {olympiad.description}
