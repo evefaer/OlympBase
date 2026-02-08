@@ -2,8 +2,9 @@ import { Link } from "react-router-dom";
 import { Star, Calendar, Users, MapPin } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
-import { Olympiad, SUBJECT_COLORS } from "@/data/olympiads";
+import { Olympiad } from "@/data/olympiads";
 import { cn } from "@/lib/utils";
+import { SubjectIcon } from "@/components/SubjectIcon";
 
 interface OlympiadCardProps {
   olympiad: Olympiad;
@@ -24,7 +25,7 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect }: OlympiadC
     <div className="card-olimpiad group animate-fade-in">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
-          <span className={cn("olimpiad-dot", SUBJECT_COLORS[olympiad.subject])} />
+          <SubjectIcon subject={olympiad.subject} size="sm" />
           <span className="text-sm font-medium text-muted-foreground">
             {olympiad.subject}
           </span>
