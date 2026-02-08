@@ -19,37 +19,29 @@ interface ParsedOlympiad {
   format: string | null;
 }
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+// Subject-specific pages on olimpiada.ru for more complete coverage
+const SUBJECT_PAGES = [
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=1&class=any&period_date=&period=year', subject: 'Математика' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=2&class=any&period_date=&period=year', subject: 'Физика' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=3&class=any&period_date=&period=year', subject: 'Информатика' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=4&class=any&period_date=&period=year', subject: 'Химия' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=5&class=any&period_date=&period=year', subject: 'Биология' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=6&class=any&period_date=&period=year', subject: 'Русский язык' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=7&class=any&period_date=&period=year', subject: 'Литература' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=8&class=any&period_date=&period=year', subject: 'История' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=9&class=any&period_date=&period=year', subject: 'Обществознание' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=10&class=any&period_date=&period=year', subject: 'География' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=11&class=any&period_date=&period=year', subject: 'Английский язык' },
+];
 
+async function scrapeSubjectPage(
+  apiKey: string, 
+  pageUrl: string, 
+  defaultSubject: string
+): Promise<ParsedOlympiad[]> {
+  console.log(`Scraping page for ${defaultSubject}: ${pageUrl}`);
+  
   try {
-    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
-    if (!apiKey) {
-      console.error('FIRECRAWL_API_KEY not configured');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Firecrawl connector not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Supabase credentials not configured');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Database not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    console.log('Starting olympiad parsing from olimpiada.ru');
-
-    // Scrape the main olympiad calendar page
     const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
       method: 'POST',
       headers: {
@@ -57,23 +49,26 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        url: 'https://olimpiada.ru/activities',
+        url: pageUrl,
         formats: ['markdown', 'extract'],
         extract: {
-          prompt: `Extract all olympiads from this page. For each olympiad extract:
-            - title: the name of the olympiad
-            - subject: the subject (Математика, Физика, Информатика, Химия, Биология, Русский язык, Литература, История, Обществознание, География, Английский язык, or other)
-            - grades: array of grades (like ["9", "10", "11"] or ["5", "6", "7", "8", "9", "10", "11"])
-            - scale: the scale (Всероссийская, Региональная, or Международная)
-            - startDate: start date in YYYY-MM-DD format
-            - endDate: end date in YYYY-MM-DD format
-            - registrationDeadline: registration deadline in YYYY-MM-DD format (use startDate if not specified)
-            - description: brief description of the olympiad
-            - website: official website URL if available
-            - organizer: organizing institution if mentioned
-            - format: format of the olympiad (Очная, Заочная, Онлайн, or Смешанная)
+          prompt: `Extract all olympiads/competitions from this page. The page is filtered for ${defaultSubject} subject.
             
-            Return an array of olympiad objects. If dates are not clear, use reasonable defaults based on typical olympiad schedules.`,
+            For each olympiad extract:
+            - title: the exact name of the olympiad (required)
+            - subject: use "${defaultSubject}" as the subject
+            - grades: array of grade numbers as strings (like ["9", "10", "11"]), extract from the page or use ["5", "6", "7", "8", "9", "10", "11"] if not specified
+            - scale: the level - "Всероссийская" for national, "Региональная" for regional, "Международная" for international, "Межрегиональная" for multi-regional
+            - startDate: start date in YYYY-MM-DD format (required, use current month if not clear)
+            - endDate: end date in YYYY-MM-DD format (required, use 1-2 weeks after start if not clear)
+            - registrationDeadline: registration deadline in YYYY-MM-DD format (use startDate minus 1 week if not specified)
+            - description: brief description of the olympiad (1-2 sentences about what it is)
+            - website: official website URL if available (null if not found)
+            - organizer: organizing institution if mentioned (null if not found)
+            - format: format of the olympiad - "Очная" for in-person, "Заочная" for correspondence, "Онлайн" for online, "Смешанная" for mixed (null if not clear)
+            
+            IMPORTANT: Extract ALL olympiads visible on the page. Include both upcoming and currently running olympiads.
+            Return an array of olympiad objects. Be thorough and extract as many as possible.`,
           schema: {
             type: 'object',
             properties: {
@@ -102,61 +97,152 @@ Deno.serve(async (req) => {
           }
         },
         onlyMainContent: true,
-        waitFor: 3000,
+        waitFor: 5000, // Increased wait time for better page loading
       }),
     });
 
-    const scrapeData = await scrapeResponse.json();
-
     if (!scrapeResponse.ok) {
-      console.error('Firecrawl API error:', scrapeData);
+      const errorData = await scrapeResponse.json();
+      console.error(`Failed to scrape ${defaultSubject}:`, errorData);
+      return [];
+    }
+
+    const scrapeData = await scrapeResponse.json();
+    const extractData = scrapeData.data?.extract || scrapeData.extract;
+    const olympiads: ParsedOlympiad[] = extractData?.olympiads || [];
+    
+    // Ensure subject is set correctly
+    const olympiadsWithSubject = olympiads.map(o => ({
+      ...o,
+      subject: o.subject || defaultSubject,
+    }));
+
+    console.log(`Found ${olympiadsWithSubject.length} olympiads for ${defaultSubject}`);
+    return olympiadsWithSubject;
+  } catch (error) {
+    console.error(`Error scraping ${defaultSubject}:`, error);
+    return [];
+  }
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (!apiKey) {
+      console.error('FIRECRAWL_API_KEY not configured');
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: scrapeData.error || `Request failed with status ${scrapeResponse.status}` 
-        }),
-        { status: scrapeResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Firecrawl connector not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Extract olympiads from response
-    const extractData = scrapeData.data?.extract || scrapeData.extract;
-    const olympiads: ParsedOlympiad[] = extractData?.olympiads || [];
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Supabase credentials not configured');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Database not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    console.log(`Successfully parsed ${olympiads.length} olympiads from website`);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Parse request body for optional parameters
+    let subjectsToScrape = SUBJECT_PAGES;
+    try {
+      const body = await req.json();
+      if (body.subjects && Array.isArray(body.subjects)) {
+        // Filter to only requested subjects
+        subjectsToScrape = SUBJECT_PAGES.filter(p => 
+          body.subjects.includes(p.subject)
+        );
+      }
+    } catch {
+      // No body or invalid JSON, use all subjects
+    }
+
+    console.log(`Starting olympiad parsing for ${subjectsToScrape.length} subjects`);
+    console.log('Subjects:', subjectsToScrape.map(s => s.subject).join(', '));
+
+    // Scrape pages in batches to avoid rate limiting
+    const BATCH_SIZE = 3;
+    const allOlympiads: ParsedOlympiad[] = [];
+    
+    for (let i = 0; i < subjectsToScrape.length; i += BATCH_SIZE) {
+      const batch = subjectsToScrape.slice(i, i + BATCH_SIZE);
+      console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(subjectsToScrape.length / BATCH_SIZE)}`);
+      
+      const batchResults = await Promise.all(
+        batch.map(page => scrapeSubjectPage(apiKey, page.url, page.subject))
+      );
+      
+      batchResults.forEach(olympiads => {
+        allOlympiads.push(...olympiads);
+      });
+      
+      // Small delay between batches to avoid rate limiting
+      if (i + BATCH_SIZE < subjectsToScrape.length) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    console.log(`Total olympiads scraped: ${allOlympiads.length}`);
 
     // Validate and clean up the data
-    const validOlympiads = olympiads.filter((o: ParsedOlympiad) => {
-      return o.title && o.subject && o.grades?.length > 0 && o.startDate && o.endDate;
+    const validOlympiads = allOlympiads.filter((o: ParsedOlympiad) => {
+      const isValid = o.title && o.subject && o.grades?.length > 0 && o.startDate && o.endDate;
+      if (!isValid) {
+        console.log(`Invalid olympiad skipped: ${o.title || 'no title'}`);
+      }
+      return isValid;
     });
 
     console.log(`${validOlympiads.length} olympiads passed validation`);
 
-    // Get existing olympiads to avoid duplicates
+    // Deduplicate by title (case-insensitive)
+    const seenTitles = new Set<string>();
+    const uniqueOlympiads = validOlympiads.filter(o => {
+      const titleLower = o.title.toLowerCase().trim();
+      if (seenTitles.has(titleLower)) {
+        return false;
+      }
+      seenTitles.add(titleLower);
+      return true;
+    });
+
+    console.log(`${uniqueOlympiads.length} unique olympiads after deduplication`);
+
+    // Get existing olympiads to avoid duplicates in database
     const { data: existingOlympiads } = await supabase
       .from('olympiads')
       .select('title');
     
-    const existingTitles = new Set((existingOlympiads || []).map(o => o.title.toLowerCase()));
+    const existingTitles = new Set((existingOlympiads || []).map(o => o.title.toLowerCase().trim()));
 
     // Filter out duplicates and prepare for insertion
-    const newOlympiads = validOlympiads
-      .filter(o => !existingTitles.has(o.title.toLowerCase()))
+    const newOlympiads = uniqueOlympiads
+      .filter(o => !existingTitles.has(o.title.toLowerCase().trim()))
       .map(o => ({
-        title: o.title,
+        title: o.title.trim(),
         subject: o.subject,
-        grades: o.grades.map(g => String(g)),
-        scale: o.scale,
+        grades: o.grades.map(g => String(g).trim()),
+        scale: o.scale || 'Всероссийская',
         start_date: o.startDate,
         end_date: o.endDate,
-        registration_deadline: o.registrationDeadline,
-        description: o.description,
+        registration_deadline: o.registrationDeadline || o.startDate,
+        description: o.description || `Олимпиада по предмету ${o.subject}`,
         website: o.website || null,
         organizer: o.organizer || null,
         format: o.format || null,
       }));
 
-    console.log(`${newOlympiads.length} new olympiads to insert (${validOlympiads.length - newOlympiads.length} duplicates skipped)`);
+    console.log(`${newOlympiads.length} new olympiads to insert (${uniqueOlympiads.length - newOlympiads.length} already exist in database)`);
 
     let insertedCount = 0;
     if (newOlympiads.length > 0) {
@@ -177,15 +263,26 @@ Deno.serve(async (req) => {
       console.log(`Successfully inserted ${insertedCount} olympiads into database`);
     }
 
+    // Log summary by subject
+    const bySubject = new Map<string, number>();
+    uniqueOlympiads.forEach(o => {
+      bySubject.set(o.subject, (bySubject.get(o.subject) || 0) + 1);
+    });
+    console.log('Olympiads by subject:', Object.fromEntries(bySubject));
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         data: {
-          parsed: validOlympiads.length,
+          totalScraped: allOlympiads.length,
+          validated: validOlympiads.length,
+          unique: uniqueOlympiads.length,
           inserted: insertedCount,
-          skippedDuplicates: validOlympiads.length - newOlympiads.length,
+          skippedDuplicates: uniqueOlympiads.length - newOlympiads.length,
+          bySubject: Object.fromEntries(bySubject),
           parsedAt: new Date().toISOString(),
-          source: 'olimpiada.ru'
+          source: 'olimpiada.ru',
+          subjectsParsed: subjectsToScrape.map(s => s.subject),
         }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
