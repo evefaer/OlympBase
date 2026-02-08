@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { olympiadsData, SUBJECT_COLORS } from "@/data/olympiads";
+import { olympiadsData } from "@/data/olympiads";
 import { cn } from "@/lib/utils";
+import { SubjectIcon } from "@/components/SubjectIcon";
 
 interface SearchInputProps {
   value: string;
@@ -116,12 +117,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
                   highlightedIndex === index ? "bg-accent" : "hover:bg-accent/50"
                 )}
               >
-                <span
-                  className={cn(
-                    "w-2 h-2 rounded-full shrink-0",
-                    SUBJECT_COLORS[olympiad.subject]
-                  )}
-                />
+                <SubjectIcon subject={olympiad.subject} size="sm" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-sm font-medium truncate">{olympiad.title}</span>
                   <span className="text-xs text-muted-foreground">
