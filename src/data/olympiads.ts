@@ -67,19 +67,6 @@ export const SUBJECT_COLORS: Record<Subject, string> = {
   "География": "bg-teal-500",
 };
 
-export const SUBJECT_ICON_NAMES: Record<Subject, string> = {
-  "Математика": "Calculator",
-  "Физика": "Atom",
-  "Информатика": "Code",
-  "Химия": "FlaskConical",
-  "Биология": "Leaf",
-  "Русский язык": "BookOpen",
-  "История": "Landmark",
-  "Обществознание": "Users",
-  "Литература": "Feather",
-  "География": "Globe",
-};
-
 export const olympiadsData: Olympiad[] = [
   {
     id: "1",
