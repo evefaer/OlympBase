@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, 
   Calendar, 
@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 
 const OlympiadPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { isSelected, toggleSelected } = useSelectedOlympiads();
   
   const olympiad = olympiadsData.find((o) => o.id === id);
@@ -34,12 +35,10 @@ const OlympiadPage = () => {
           <h1 className="text-2xl font-bold text-foreground mb-4">
             Олимпиада не найдена
           </h1>
-          <Link to="/calendar">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Вернуться к календарю
-            </Button>
-          </Link>
+          <Button variant="outline" onClick={() => navigate(-1)}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Назад
+          </Button>
         </main>
       </div>
     );
@@ -61,13 +60,13 @@ const OlympiadPage = () => {
       <Header />
       
       <main className="container py-8">
-        <Link 
-          to="/calendar" 
+        <button 
+          onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
-          Назад к календарю
-        </Link>
+          Назад
+        </button>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
