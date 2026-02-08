@@ -9,12 +9,15 @@ import {
   Users,
   Feather,
   Globe,
+  Languages,
+  Palette,
+  HelpCircle,
   LucideIcon,
 } from "lucide-react";
 import { Subject, SUBJECT_COLORS } from "@/data/olympiads";
 import { cn } from "@/lib/utils";
 
-const SUBJECT_ICONS: Record<Subject, LucideIcon> = {
+const SUBJECT_ICONS: Record<string, LucideIcon> = {
   "Математика": Calculator,
   "Физика": Atom,
   "Информатика": Code,
@@ -25,10 +28,15 @@ const SUBJECT_ICONS: Record<Subject, LucideIcon> = {
   "Обществознание": Users,
   "Литература": Feather,
   "География": Globe,
+  "Английский язык": Languages,
+  "Искусство": Palette,
 };
 
+const DEFAULT_ICON = HelpCircle;
+const DEFAULT_COLOR = "bg-gray-500";
+
 interface SubjectIconProps {
-  subject: Subject;
+  subject: Subject | string;
   size?: "sm" | "md" | "lg";
   showBackground?: boolean;
   className?: string;
@@ -40,7 +48,8 @@ export function SubjectIcon({
   showBackground = true,
   className,
 }: SubjectIconProps) {
-  const Icon = SUBJECT_ICONS[subject];
+  const Icon = SUBJECT_ICONS[subject] || DEFAULT_ICON;
+  const bgColor = SUBJECT_COLORS[subject as Subject] || DEFAULT_COLOR;
   
   const sizeClasses = {
     sm: "w-10 h-10",
@@ -73,7 +82,7 @@ export function SubjectIcon({
     <div
       className={cn(
         containerSizes[size],
-        SUBJECT_COLORS[subject],
+        bgColor,
         "rounded flex items-center justify-center flex-shrink-0",
         className
       )}
@@ -87,7 +96,7 @@ export function SubjectIconWithLabel({
   subject,
   size = "sm",
 }: {
-  subject: Subject;
+  subject: Subject | string;
   size?: "sm" | "md" | "lg";
 }) {
   return (
