@@ -1,1 +1,4 @@
 project_id = "yayfwlywcimnexrkenhb"
+
+[functions.parse-olympiads]
+verify_jwt = false
