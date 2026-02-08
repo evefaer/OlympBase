@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { FilterPanel, TimeFilter } from "@/components/FilterPanel";
 import { CalendarView } from "@/components/CalendarView";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
+import { AddOlympiadDialog } from "@/components/AddOlympiadDialog";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { useOlympiads } from "@/hooks/useOlympiads";
 import { Subject, Grade, Scale } from "@/data/olympiads";
@@ -73,13 +74,16 @@ const CalendarPage = () => {
       <UpcomingReminder />
       
       <main className="container py-8">
-        <div className="mb-6 animate-fade-in">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Календарь олимпиад
-          </h1>
-          <p className="text-muted-foreground">
-            Планируйте участие в олимпиадах и не пропускайте важные даты
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 animate-fade-in">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Календарь олимпиад
+            </h1>
+            <p className="text-muted-foreground">
+              Планируйте участие в олимпиадах и не пропускайте важные даты
+            </p>
+          </div>
+          <AddOlympiadDialog />
         </div>
 
         <FilterPanel
