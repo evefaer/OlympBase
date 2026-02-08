@@ -46,20 +46,12 @@ const formSchema = z.object({
   title: z.string().trim().min(3, "Название должно быть не менее 3 символов").max(200, "Название слишком длинное"),
   subject: z.string().min(1, "Выберите предмет"),
   grades: z.array(z.string()).min(1, "Выберите хотя бы один класс"),
-  scale: z.string().min(1, "Выберите масштаб"),
-  startDate: z.date({ required_error: "Выберите дату начала" }),
-  endDate: z.date({ required_error: "Выберите дату окончания" }),
-  description: z.string().trim().min(10, "Описание должно быть не менее 10 символов").max(1000, "Описание слишком длинное"),
-  registrationDeadline: z.date({ required_error: "Выберите дедлайн регистрации" }),
+  scale: z.string().optional(),
+  date: z.date({ required_error: "Выберите дату" }),
+  notes: z.string().max(1000, "Заметки слишком длинные").optional(),
   website: z.string().url("Введите корректный URL").optional().or(z.literal("")),
   organizer: z.string().max(200, "Название организатора слишком длинное").optional(),
   format: z.enum(["Онлайн", "Очный", "Смешанный"]).optional(),
-}).refine((data) => data.endDate >= data.startDate, {
-  message: "Дата окончания должна быть не раньше даты начала",
-  path: ["endDate"],
-}).refine((data) => data.registrationDeadline <= data.startDate, {
-  message: "Дедлайн регистрации должен быть до начала олимпиады",
-  path: ["registrationDeadline"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -79,22 +71,23 @@ export function AddOlympiadDialog({ trigger }: AddOlympiadDialogProps) {
       subject: "",
       grades: [],
       scale: "",
-      description: "",
+      notes: "",
       website: "",
       organizer: "",
     },
   });
 
   const onSubmit = (values: FormValues) => {
+    const dateStr = format(values.date, "yyyy-MM-dd");
     const olympiad: Omit<Olympiad, "id"> = {
       title: values.title,
       subject: values.subject as Subject,
       grades: values.grades as Grade[],
-      scale: values.scale as Scale,
-      startDate: format(values.startDate, "yyyy-MM-dd"),
-      endDate: format(values.endDate, "yyyy-MM-dd"),
-      description: values.description,
-      registrationDeadline: format(values.registrationDeadline, "yyyy-MM-dd"),
+      scale: (values.scale as Scale) || "Всероссийская",
+      startDate: dateStr,
+      endDate: dateStr,
+      description: values.notes || "",
+      registrationDeadline: dateStr,
       website: values.website || undefined,
       organizer: values.organizer || undefined,
       format: values.format || undefined,
@@ -168,7 +161,7 @@ export function AddOlympiadDialog({ trigger }: AddOlympiadDialogProps) {
                 name="scale"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Масштаб *</FormLabel>
+                    <FormLabel>Масштаб</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -231,134 +224,53 @@ export function AddOlympiadDialog({ trigger }: AddOlympiadDialogProps) {
               )}
             />
 
-            <div className="grid grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Дата начала *</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd.MM.yyyy", { locale: ru })
-                            ) : (
-                              <span>Выберите</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          locale={ru}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="endDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Дата окончания *</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd.MM.yyyy", { locale: ru })
-                            ) : (
-                              <span>Выберите</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          locale={ru}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="registrationDeadline"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Дедлайн регистрации *</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd.MM.yyyy", { locale: ru })
-                            ) : (
-                              <span>Выберите</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          locale={ru}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Дата *</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "dd.MM.yyyy", { locale: ru })
+                          ) : (
+                            <span>Выберите</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        locale={ru}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
-              name="description"
+              name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Описание *</FormLabel>
+                  <FormLabel>Заметки</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Краткое описание олимпиады..."
                       className="resize-none"
                       rows={3}
                       {...field}
