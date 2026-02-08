@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
-import { FilterPanel, TimeFilter } from "@/components/FilterPanel";
+import { FilterPanel, TimeFilter, ViewMode } from "@/components/FilterPanel";
 import { OlympiadCard } from "@/components/OlympiadCard";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { AddOlympiadDialog } from "@/components/AddOlympiadDialog";
@@ -14,7 +14,7 @@ const ListPage = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<Grade[]>([]);
   const [selectedScales, setSelectedScales] = useState<Scale[]>([]);
-  const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined,
@@ -24,7 +24,7 @@ const ListPage = () => {
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
   const { data: olympiadsData = [], isLoading } = useOlympiads();
-  const { isCustomOlympiad, deleteOlympiad } = useCustomOlympiads();
+  const { isCustomOlympiad, deleteOlympiad, customOlympiads } = useCustomOlympiads();
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData
@@ -37,8 +37,11 @@ const ListPage = () => {
           }
         }
 
-        // Filter by selected
-        if (showOnlySelected && !isSelected(olympiad.id)) {
+        // Filter by view mode
+        if (viewMode === "selected" && !isSelected(olympiad.id)) {
+          return false;
+        }
+        if (viewMode === "custom" && !isCustomOlympiad(olympiad.id)) {
           return false;
         }
 
@@ -93,7 +96,7 @@ const ListPage = () => {
         return true;
       })
       .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
-  }, [olympiadsData, selectedSubjects, selectedGrades, selectedScales, showOnlySelected, dateRange, searchQuery, timeFilter, isSelected]);
+  }, [olympiadsData, selectedSubjects, selectedGrades, selectedScales, viewMode, dateRange, searchQuery, timeFilter, isSelected, isCustomOlympiad]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,9 +123,10 @@ const ListPage = () => {
           onSubjectsChange={setSelectedSubjects}
           onGradesChange={setSelectedGrades}
           onScalesChange={setSelectedScales}
-          showOnlySelected={showOnlySelected}
-          onShowOnlySelectedChange={setShowOnlySelected}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
           selectedCount={selectedCount}
+          customCount={customOlympiads.length}
           showDateRange
           dateRange={dateRange}
           onDateRangeChange={setDateRange}
