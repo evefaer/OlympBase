@@ -112,7 +112,7 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
               <PopoverTrigger asChild>
                 <button
                   className={cn(
-                    "calendar-day min-h-[80px] sm:min-h-[120px] border border-transparent hover:border-border rounded-lg transition-all p-2 sm:p-3",
+                    "calendar-day min-h-[60px] sm:min-h-[100px] md:min-h-[120px] border border-transparent hover:border-border rounded-lg transition-all p-1 sm:p-2 md:p-3",
                     !isCurrentMonth && "calendar-day-other opacity-40",
                     isToday && "calendar-day-current",
                     dayOlympiads.length > 0 && "cursor-pointer hover:bg-secondary/50"
@@ -127,24 +127,44 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
                   >
                     {format(day, "d")}
                   </span>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {dayOlympiads.slice(0, 2).map((olympiad) => (
-                      <SubjectIcon
-                        key={olympiad.id}
-                        subject={olympiad.subject}
-                        size="md"
-                      />
-                    ))}
-                    {dayOlympiads.length > 2 && (
-                      <span className="text-xs text-muted-foreground font-medium self-end">
-                        +{dayOlympiads.length - 2}
-                      </span>
-                    )}
+                  <div className="flex flex-wrap gap-0.5 sm:gap-1 mt-1">
+                    {/* На мобильных показываем только точки-индикаторы */}
+                    <div className="sm:hidden flex gap-0.5 flex-wrap">
+                      {dayOlympiads.slice(0, 3).map((olympiad) => (
+                        <div
+                          key={olympiad.id}
+                          className={cn(
+                            "w-2 h-2 rounded-full",
+                            SUBJECT_COLORS[olympiad.subject as keyof typeof SUBJECT_COLORS] || "bg-gray-400"
+                          )}
+                        />
+                      ))}
+                      {dayOlympiads.length > 3 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          +{dayOlympiads.length - 3}
+                        </span>
+                      )}
+                    </div>
+                    {/* На десктопе показываем иконки */}
+                    <div className="hidden sm:flex flex-wrap gap-1">
+                      {dayOlympiads.slice(0, 2).map((olympiad) => (
+                        <SubjectIcon
+                          key={olympiad.id}
+                          subject={olympiad.subject}
+                          size="sm"
+                        />
+                      ))}
+                      {dayOlympiads.length > 2 && (
+                        <span className="text-xs text-muted-foreground font-medium self-end">
+                          +{dayOlympiads.length - 2}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </button>
               </PopoverTrigger>
               {dayOlympiads.length > 0 && (
-                <PopoverContent className="w-80 p-0" align="start">
+                <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 max-w-sm p-0" align="center" side="bottom">
                   <div className="p-3 border-b border-border">
                     <h3 className="font-semibold">
                       {format(day, "d MMMM yyyy", { locale: ru })}
@@ -216,8 +236,8 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
         })}
       </div>
 
-      {/* Legend */}
-      <div className="mt-6 pt-4 border-t border-border">
+      {/* Legend - скрыта на мобильных */}
+      <div className="hidden sm:block mt-6 pt-4 border-t border-border">
         <p className="text-sm text-muted-foreground mb-2">Предметы:</p>
         <div className="flex flex-wrap gap-x-4 gap-y-2">
           {Object.keys(SUBJECT_COLORS).map((subject) => (

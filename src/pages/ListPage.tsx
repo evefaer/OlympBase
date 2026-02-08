@@ -103,14 +103,14 @@ const ListPage = () => {
       <Header />
       <UpcomingReminder />
       
-      <main className="container py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 animate-fade-in">
+      <main className="container py-4 sm:py-8 px-3 sm:px-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+            <h1 className="text-xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
               Список олимпиад
             </h1>
-            <p className="text-muted-foreground">
-              Найдите олимпиады по вашим интересам и добавьте их в избранное
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Найдите олимпиады по вашим интересам
             </p>
           </div>
           <AddOlympiadDialog />
@@ -141,7 +141,7 @@ const ListPage = () => {
             <p className="text-lg">Загрузка олимпиад...</p>
           </div>
         ) : filteredOlympiads.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filteredOlympiads.map((olympiad) => (
               <OlympiadCard
                 key={olympiad.id}
