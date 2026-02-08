@@ -43,11 +43,9 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         url: 'https://olimpiada.ru/activities',
-        formats: [
-          'markdown',
-          {
-            type: 'json',
-            prompt: `Extract all olympiads from this page. For each olympiad extract:
+        formats: ['markdown', 'extract'],
+        extract: {
+          prompt: `Extract all olympiads from this page. For each olympiad extract:
             - title: the name of the olympiad
             - subject: the subject (Математика, Физика, Информатика, Химия, Биология, Русский язык, Литература, История, Обществознание, География, Английский язык, or other)
             - grades: array of grades (like ["9", "10", "11"] or ["5", "6", "7", "8", "9", "10", "11"])
@@ -61,34 +59,33 @@ Deno.serve(async (req) => {
             - format: format of the olympiad (Очная, Заочная, Онлайн, or Смешанная)
             
             Return an array of olympiad objects. If dates are not clear, use reasonable defaults based on typical olympiad schedules.`,
-            schema: {
-              type: 'object',
-              properties: {
-                olympiads: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      title: { type: 'string' },
-                      subject: { type: 'string' },
-                      grades: { type: 'array', items: { type: 'string' } },
-                      scale: { type: 'string' },
-                      startDate: { type: 'string' },
-                      endDate: { type: 'string' },
-                      registrationDeadline: { type: 'string' },
-                      description: { type: 'string' },
-                      website: { type: 'string' },
-                      organizer: { type: 'string' },
-                      format: { type: 'string' }
-                    },
-                    required: ['title', 'subject', 'grades', 'scale', 'startDate', 'endDate', 'registrationDeadline', 'description']
-                  }
+          schema: {
+            type: 'object',
+            properties: {
+              olympiads: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    title: { type: 'string' },
+                    subject: { type: 'string' },
+                    grades: { type: 'array', items: { type: 'string' } },
+                    scale: { type: 'string' },
+                    startDate: { type: 'string' },
+                    endDate: { type: 'string' },
+                    registrationDeadline: { type: 'string' },
+                    description: { type: 'string' },
+                    website: { type: 'string' },
+                    organizer: { type: 'string' },
+                    format: { type: 'string' }
+                  },
+                  required: ['title', 'subject', 'grades', 'scale', 'startDate', 'endDate', 'registrationDeadline', 'description']
                 }
-              },
-              required: ['olympiads']
-            }
+              }
+            },
+            required: ['olympiads']
           }
-        ],
+        },
         onlyMainContent: true,
         waitFor: 3000,
       }),
@@ -107,9 +104,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract olympiads from response
-    const jsonData = scrapeData.data?.json || scrapeData.json;
-    const olympiads: ParsedOlympiad[] = jsonData?.olympiads || [];
+    // Extract olympiads from response - check both extract and json fields
+    const extractData = scrapeData.data?.extract || scrapeData.extract;
+    const olympiads: ParsedOlympiad[] = extractData?.olympiads || [];
 
     console.log(`Successfully parsed ${olympiads.length} olympiads`);
 
