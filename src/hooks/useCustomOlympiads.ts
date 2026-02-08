@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Olympiad, Subject, Grade, Scale } from "@/data/olympiads";
+import { Olympiad } from "@/data/olympiads";
 
 const STORAGE_KEY = "custom-olympiads";
 
@@ -7,21 +7,22 @@ function generateId(): string {
   return `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export function useCustomOlympiads() {
-  const [customOlympiads, setCustomOlympiads] = useState<Olympiad[]>([]);
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setCustomOlympiads(parsed);
-      } catch (e) {
-        console.error("Failed to parse custom olympiads:", e);
-      }
+function getStoredOlympiads(): Olympiad[] {
+  if (typeof window === "undefined") return [];
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch (e) {
+      console.error("Failed to parse custom olympiads:", e);
     }
-  }, []);
+  }
+  return [];
+}
+
+export function useCustomOlympiads() {
+  // Initialize synchronously from localStorage
+  const [customOlympiads, setCustomOlympiads] = useState<Olympiad[]>(getStoredOlympiads);
 
   // Save to localStorage whenever customOlympiads changes
   useEffect(() => {
