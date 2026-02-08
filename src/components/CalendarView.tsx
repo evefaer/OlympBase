@@ -129,12 +129,12 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
                   </span>
                   <div className="flex flex-wrap gap-0.5 sm:gap-1 mt-1">
                     {/* На мобильных показываем только точки-индикаторы */}
-                    <div className="sm:hidden flex gap-0.5 flex-wrap">
+                    <div className="sm:hidden flex gap-1 flex-wrap">
                       {dayOlympiads.slice(0, 3).map((olympiad) => (
                         <div
                           key={olympiad.id}
                           className={cn(
-                            "w-2 h-2 rounded-full",
+                            "w-2.5 h-2.5 rounded-full",
                             SUBJECT_COLORS[olympiad.subject as keyof typeof SUBJECT_COLORS] || "bg-gray-400"
                           )}
                         />
@@ -236,10 +236,25 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
         })}
       </div>
 
-      {/* Legend - скрыта на мобильных */}
-      <div className="hidden sm:block mt-6 pt-4 border-t border-border">
-        <p className="text-sm text-muted-foreground mb-2">Предметы:</p>
-        <div className="flex flex-wrap gap-x-4 gap-y-2">
+      {/* Legend - на десктопе с иконками, на мобильных с точками */}
+      <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-border">
+        <p className="text-xs sm:text-sm text-muted-foreground mb-2">Предметы:</p>
+        {/* Мобильная версия с точками */}
+        <div className="sm:hidden flex flex-wrap gap-x-3 gap-y-1.5">
+          {Object.keys(SUBJECT_COLORS).map((subject) => (
+            <div key={subject} className="flex items-center gap-1.5">
+              <div
+                className={cn(
+                  "w-2.5 h-2.5 rounded-full",
+                  SUBJECT_COLORS[subject as keyof typeof SUBJECT_COLORS]
+                )}
+              />
+              <span className="text-xs text-muted-foreground">{subject}</span>
+            </div>
+          ))}
+        </div>
+        {/* Десктопная версия с иконками */}
+        <div className="hidden sm:flex flex-wrap gap-x-4 gap-y-2">
           {Object.keys(SUBJECT_COLORS).map((subject) => (
             <SubjectIconWithLabel
               key={subject}
