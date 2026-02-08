@@ -1,3 +1,5 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -31,6 +33,19 @@ Deno.serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Supabase credentials not configured');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Database not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     console.log('Starting olympiad parsing from olimpiada.ru');
 
@@ -104,29 +119,71 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Extract olympiads from response - check both extract and json fields
+    // Extract olympiads from response
     const extractData = scrapeData.data?.extract || scrapeData.extract;
     const olympiads: ParsedOlympiad[] = extractData?.olympiads || [];
 
-    console.log(`Successfully parsed ${olympiads.length} olympiads`);
+    console.log(`Successfully parsed ${olympiads.length} olympiads from website`);
 
     // Validate and clean up the data
     const validOlympiads = olympiads.filter((o: ParsedOlympiad) => {
       return o.title && o.subject && o.grades?.length > 0 && o.startDate && o.endDate;
-    }).map((o: ParsedOlympiad) => ({
-      ...o,
-      grades: o.grades.map(g => String(g)),
-      website: o.website || null,
-      organizer: o.organizer || null,
-      format: o.format || null,
-    }));
+    });
+
+    console.log(`${validOlympiads.length} olympiads passed validation`);
+
+    // Get existing olympiads to avoid duplicates
+    const { data: existingOlympiads } = await supabase
+      .from('olympiads')
+      .select('title');
+    
+    const existingTitles = new Set((existingOlympiads || []).map(o => o.title.toLowerCase()));
+
+    // Filter out duplicates and prepare for insertion
+    const newOlympiads = validOlympiads
+      .filter(o => !existingTitles.has(o.title.toLowerCase()))
+      .map(o => ({
+        title: o.title,
+        subject: o.subject,
+        grades: o.grades.map(g => String(g)),
+        scale: o.scale,
+        start_date: o.startDate,
+        end_date: o.endDate,
+        registration_deadline: o.registrationDeadline,
+        description: o.description,
+        website: o.website || null,
+        organizer: o.organizer || null,
+        format: o.format || null,
+      }));
+
+    console.log(`${newOlympiads.length} new olympiads to insert (${validOlympiads.length - newOlympiads.length} duplicates skipped)`);
+
+    let insertedCount = 0;
+    if (newOlympiads.length > 0) {
+      const { data: inserted, error: insertError } = await supabase
+        .from('olympiads')
+        .insert(newOlympiads)
+        .select();
+
+      if (insertError) {
+        console.error('Error inserting olympiads:', insertError);
+        return new Response(
+          JSON.stringify({ success: false, error: `Database insert failed: ${insertError.message}` }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      insertedCount = inserted?.length || 0;
+      console.log(`Successfully inserted ${insertedCount} olympiads into database`);
+    }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         data: {
-          olympiads: validOlympiads,
-          count: validOlympiads.length,
+          parsed: validOlympiads.length,
+          inserted: insertedCount,
+          skippedDuplicates: validOlympiads.length - newOlympiads.length,
           parsedAt: new Date().toISOString(),
           source: 'olimpiada.ru'
         }

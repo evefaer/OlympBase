@@ -4,7 +4,6 @@ import { FilterPanel, TimeFilter, ViewMode } from "@/components/FilterPanel";
 import { OlympiadCard } from "@/components/OlympiadCard";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { AddOlympiadDialog } from "@/components/AddOlympiadDialog";
-import { ParserControl } from "@/components/ParserControl";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { useOlympiads } from "@/hooks/useOlympiads";
 import { useCustomOlympiads } from "@/hooks/useCustomOlympiads";
@@ -116,8 +115,6 @@ const ListPage = () => {
           </div>
           <AddOlympiadDialog />
         </div>
-
-        <ParserControl />
 
         <FilterPanel
           selectedSubjects={selectedSubjects}
