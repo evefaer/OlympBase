@@ -219,8 +219,8 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
       {/* Legend */}
       <div className="mt-6 pt-4 border-t border-border">
         <p className="text-sm text-muted-foreground mb-2">Предметы:</p>
-        <div className="flex flex-wrap gap-3">
-          {Object.keys(SUBJECT_COLORS).slice(0, 6).map((subject) => (
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
+          {Object.keys(SUBJECT_COLORS).map((subject) => (
             <SubjectIconWithLabel
               key={subject}
               subject={subject as keyof typeof SUBJECT_COLORS}
