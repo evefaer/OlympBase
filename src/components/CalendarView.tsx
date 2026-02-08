@@ -13,7 +13,6 @@ import {
   parseISO,
   startOfWeek,
   endOfWeek,
-  isWithinInterval,
 } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Olympiad, SUBJECT_COLORS } from "@/data/olympiads";
@@ -23,6 +22,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { SubjectIcon, SubjectIconWithLabel } from "@/components/SubjectIcon";
 
 interface CalendarViewProps {
   olympiads: Olympiad[];
@@ -129,14 +129,14 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
                   </span>
                   <div className="flex flex-wrap gap-0.5 mt-1">
                     {dayOlympiads.slice(0, 3).map((olympiad) => (
-                      <span
+                      <SubjectIcon
                         key={olympiad.id}
-                        className={cn("olimpiad-dot", SUBJECT_COLORS[olympiad.subject])}
-                        title={olympiad.title}
+                        subject={olympiad.subject}
+                        size="sm"
                       />
                     ))}
                     {dayOlympiads.length > 3 && (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] text-muted-foreground ml-0.5">
                         +{dayOlympiads.length - 3}
                       </span>
                     )}
@@ -162,12 +162,7 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span
-                                className={cn(
-                                  "olimpiad-dot flex-shrink-0",
-                                  SUBJECT_COLORS[olympiad.subject]
-                                )}
-                              />
+                              <SubjectIcon subject={olympiad.subject} size="sm" />
                               <span className="text-xs text-muted-foreground">
                                 {olympiad.subject}
                               </span>
@@ -225,11 +220,12 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
       <div className="mt-6 pt-4 border-t border-border">
         <p className="text-sm text-muted-foreground mb-2">Предметы:</p>
         <div className="flex flex-wrap gap-3">
-          {Object.entries(SUBJECT_COLORS).slice(0, 6).map(([subject, color]) => (
-            <div key={subject} className="flex items-center gap-1.5">
-              <span className={cn("olimpiad-dot", color)} />
-              <span className="text-xs text-muted-foreground">{subject}</span>
-            </div>
+          {Object.keys(SUBJECT_COLORS).slice(0, 6).map((subject) => (
+            <SubjectIconWithLabel
+              key={subject}
+              subject={subject as keyof typeof SUBJECT_COLORS}
+              size="sm"
+            />
           ))}
         </div>
       </div>
