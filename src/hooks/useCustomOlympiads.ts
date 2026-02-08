@@ -9,13 +9,19 @@ function generateId(): string {
 
 function getStoredOlympiads(): Olympiad[] {
   if (typeof window === "undefined") return [];
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch (e) {
-      console.error("Failed to parse custom olympiads:", e);
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Validate that it's an array
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
     }
+  } catch (e) {
+    console.error("Failed to parse custom olympiads:", e);
+    // Clear corrupted data
+    localStorage.removeItem(STORAGE_KEY);
   }
   return [];
 }
