@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Star, ExternalLink } from "lucide-react";
 import {
   format,
   startOfMonth,
@@ -171,32 +172,44 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
                                 {olympiad.subject}
                               </span>
                             </div>
-                            <p className="text-sm font-medium truncate">
+                            <Link 
+                              to={`/olympiad/${olympiad.id}`}
+                              className="text-sm font-medium truncate block hover:text-primary transition-colors"
+                            >
                               {olympiad.title}
-                            </p>
+                            </Link>
                             <p className="text-xs text-muted-foreground mt-1">
                               {olympiad.scale} • {olympiad.grades.join(", ")} кл.
                             </p>
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onToggleSelect(olympiad.id);
-                            }}
-                            className={cn(
-                              "p-1.5 rounded-lg transition-all flex-shrink-0",
-                              isSelected(olympiad.id)
-                                ? "bg-warning/10 text-warning"
-                                : "bg-secondary text-muted-foreground hover:text-warning hover:bg-warning/10"
-                            )}
-                          >
-                            <Star
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <Link
+                              to={`/olympiad/${olympiad.id}`}
+                              className="p-1.5 rounded-lg bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleSelect(olympiad.id);
+                              }}
                               className={cn(
-                                "w-4 h-4",
-                                isSelected(olympiad.id) && "fill-current"
+                                "p-1.5 rounded-lg transition-all",
+                                isSelected(olympiad.id)
+                                  ? "bg-warning/10 text-warning"
+                                  : "bg-secondary text-muted-foreground hover:text-warning hover:bg-warning/10"
                               )}
-                            />
-                          </button>
+                            >
+                              <Star
+                                className={cn(
+                                  "w-4 h-4",
+                                  isSelected(olympiad.id) && "fill-current"
+                                )}
+                              />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
