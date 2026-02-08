@@ -15,6 +15,8 @@ import { SearchInput } from "@/components/SearchInput";
 
 export type TimeFilter = "all" | "upcoming" | "past";
 
+export type ViewMode = "all" | "selected" | "custom";
+
 interface FilterPanelProps {
   selectedSubjects: Subject[];
   selectedGrades: Grade[];
@@ -22,9 +24,10 @@ interface FilterPanelProps {
   onSubjectsChange: (subjects: Subject[]) => void;
   onGradesChange: (grades: Grade[]) => void;
   onScalesChange: (scales: Scale[]) => void;
-  showOnlySelected: boolean;
-  onShowOnlySelectedChange: (value: boolean) => void;
+  viewMode: ViewMode;
+  onViewModeChange: (value: ViewMode) => void;
   selectedCount: number;
+  customCount: number;
   showDateRange?: boolean;
   dateRange?: { from: Date | undefined; to: Date | undefined };
   onDateRangeChange?: (range: { from: Date | undefined; to: Date | undefined }) => void;
@@ -41,9 +44,10 @@ export function FilterPanel({
   onSubjectsChange,
   onGradesChange,
   onScalesChange,
-  showOnlySelected,
-  onShowOnlySelectedChange,
+  viewMode,
+  onViewModeChange,
   selectedCount,
+  customCount,
   showDateRange = false,
   dateRange,
   onDateRangeChange,
@@ -293,25 +297,39 @@ export function FilterPanel({
         <span className="text-sm text-muted-foreground">Показать:</span>
         <div className="flex bg-secondary rounded-lg p-1 overflow-x-auto">
           <button
-            onClick={() => onShowOnlySelectedChange(false)}
+            onClick={() => onViewModeChange("all")}
             className={cn(
               "px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap",
-              !showOnlySelected ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              viewMode === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
             )}
           >
-            Все олимпиады
+            Все
           </button>
           <button
-            onClick={() => onShowOnlySelectedChange(true)}
+            onClick={() => onViewModeChange("selected")}
             className={cn(
               "px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap",
-              showOnlySelected ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              viewMode === "selected" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
             )}
           >
             Выбранные
             {selectedCount > 0 && (
               <span className="bg-warning text-warning-foreground text-xs px-1.5 py-0.5 rounded-full">
                 {selectedCount}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => onViewModeChange("custom")}
+            className={cn(
+              "px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap",
+              viewMode === "custom" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+            )}
+          >
+            Мои
+            {customCount > 0 && (
+              <span className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+                {customCount}
               </span>
             )}
           </button>

@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
-import { FilterPanel, TimeFilter } from "@/components/FilterPanel";
+import { FilterPanel, TimeFilter, ViewMode } from "@/components/FilterPanel";
 import { CalendarView } from "@/components/CalendarView";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { AddOlympiadDialog } from "@/components/AddOlympiadDialog";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { useOlympiads } from "@/hooks/useOlympiads";
+import { useCustomOlympiads } from "@/hooks/useCustomOlympiads";
 import { Subject, Grade, Scale } from "@/data/olympiads";
 import { parseISO, isBefore, startOfDay } from "date-fns";
 
@@ -13,12 +14,13 @@ const CalendarPage = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
   const [selectedGrades, setSelectedGrades] = useState<Grade[]>([]);
   const [selectedScales, setSelectedScales] = useState<Scale[]>([]);
-  const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
   const { data: olympiadsData = [], isLoading } = useOlympiads();
+  const { isCustomOlympiad, customOlympiads } = useCustomOlympiads();
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData.filter((olympiad) => {
@@ -30,8 +32,11 @@ const CalendarPage = () => {
         }
       }
 
-      // Filter by selected
-      if (showOnlySelected && !isSelected(olympiad.id)) {
+      // Filter by view mode
+      if (viewMode === "selected" && !isSelected(olympiad.id)) {
+        return false;
+      }
+      if (viewMode === "custom" && !isCustomOlympiad(olympiad.id)) {
         return false;
       }
 
@@ -66,7 +71,7 @@ const CalendarPage = () => {
 
       return true;
     });
-  }, [olympiadsData, selectedSubjects, selectedGrades, selectedScales, showOnlySelected, searchQuery, timeFilter, isSelected]);
+  }, [olympiadsData, selectedSubjects, selectedGrades, selectedScales, viewMode, searchQuery, timeFilter, isSelected, isCustomOlympiad]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,9 +98,10 @@ const CalendarPage = () => {
           onSubjectsChange={setSelectedSubjects}
           onGradesChange={setSelectedGrades}
           onScalesChange={setSelectedScales}
-          showOnlySelected={showOnlySelected}
-          onShowOnlySelectedChange={setShowOnlySelected}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
           selectedCount={selectedCount}
+          customCount={customOlympiads.length}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           timeFilter={timeFilter}
