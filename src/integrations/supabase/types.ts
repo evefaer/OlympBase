@@ -14,7 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      olympiads: {
+        Row: {
+          created_at: string
+          description: string
+          end_date: string
+          format: string | null
+          grades: string[]
+          id: string
+          organizer: string | null
+          prizes: string[] | null
+          registration_deadline: string
+          requirements: string[] | null
+          scale: string
+          start_date: string
+          subject: string
+          title: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          end_date: string
+          format?: string | null
+          grades?: string[]
+          id?: string
+          organizer?: string | null
+          prizes?: string[] | null
+          registration_deadline: string
+          requirements?: string[] | null
+          scale: string
+          start_date: string
+          subject: string
+          title: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          end_date?: string
+          format?: string | null
+          grades?: string[]
+          id?: string
+          organizer?: string | null
+          prizes?: string[] | null
+          registration_deadline?: string
+          requirements?: string[] | null
+          scale?: string
+          start_date?: string
+          subject?: string
+          title?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
