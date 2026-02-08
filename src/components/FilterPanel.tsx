@@ -326,7 +326,7 @@ export function FilterPanel({
               viewMode === "custom" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
             )}
           >
-            Мои
+            Добавленные
             {customCount > 0 && (
               <span className="bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
                 {customCount}
