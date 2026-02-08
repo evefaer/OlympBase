@@ -59,49 +59,50 @@ const OlympiadPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container py-8">
+      <main className="container py-4 sm:py-8 px-4 sm:px-6">
         <button 
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 sm:mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Назад
         </button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <div className="card-olimpiad">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
                 <span className={cn("w-3 h-3 rounded-full", SUBJECT_COLORS[olympiad.subject])} />
-                <Badge variant="secondary">{olympiad.subject}</Badge>
-                <Badge variant="outline">{olympiad.scale}</Badge>
+                <Badge variant="secondary" className="text-xs">{olympiad.subject}</Badge>
+                <Badge variant="outline" className="text-xs">{olympiad.scale}</Badge>
                 {olympiad.format && (
-                  <Badge variant="outline">{olympiad.format}</Badge>
+                  <Badge variant="outline" className="text-xs">{olympiad.format}</Badge>
                 )}
               </div>
 
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-3 sm:mb-4">
                 {olympiad.title}
               </h1>
 
-              <p className="text-muted-foreground leading-relaxed mb-6">
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-6">
                 {olympiad.description}
               </p>
 
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                 <Button
                   onClick={() => toggleSelected(olympiad.id)}
                   variant={selected ? "default" : "outline"}
-                  className="gap-2"
+                  className="gap-2 w-full sm:w-auto"
+                  size="default"
                 >
                   <Star className={cn("w-4 h-4", selected && "fill-current")} />
-                  {selected ? "В избранном" : "Добавить в избранное"}
+                  {selected ? "В избранном" : "В избранное"}
                 </Button>
 
                 {olympiad.website && (
-                  <a href={olympiad.website} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="gap-2">
+                  <a href={olympiad.website} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                    <Button variant="outline" className="gap-2 w-full">
                       <ExternalLink className="w-4 h-4" />
                       Сайт олимпиады
                     </Button>
@@ -148,9 +149,9 @@ const OlympiadPage = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div className="card-olimpiad">
-              <h2 className="text-lg font-semibold text-foreground mb-4">
+              <h2 className="text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">
                 Информация
               </h2>
               

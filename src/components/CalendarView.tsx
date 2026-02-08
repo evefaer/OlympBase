@@ -67,16 +67,16 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
   return (
-    <div className="bg-card rounded-xl border border-border p-6 animate-fade-in">
+    <div className="bg-card rounded-xl border border-border p-3 sm:p-6 animate-fade-in">
       {/* Calendar Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
         <button
           onClick={prevMonth}
           className="p-2 rounded-lg hover:bg-secondary transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h2 className="text-xl font-semibold capitalize">
+        <h2 className="text-base sm:text-xl font-semibold capitalize">
           {format(currentMonth, "LLLL yyyy", { locale: ru })}
         </h2>
         <button
@@ -88,11 +88,11 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
       </div>
 
       {/* Week Days Header */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
         {weekDays.map((day) => (
           <div
             key={day}
-            className="text-center text-sm font-medium text-muted-foreground py-2"
+            className="text-center text-xs sm:text-sm font-medium text-muted-foreground py-1 sm:py-2"
           >
             {day}
           </div>
@@ -100,7 +100,7 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
         {days.map((day) => {
           const dateKey = format(day, "yyyy-MM-dd");
           const dayOlympiads = olympiadsByDate.get(dateKey) || [];
@@ -112,7 +112,7 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
               <PopoverTrigger asChild>
                 <button
                   className={cn(
-                    "calendar-day min-h-[80px] border border-transparent hover:border-border rounded-lg transition-all",
+                    "calendar-day min-h-[50px] sm:min-h-[80px] border border-transparent hover:border-border rounded-lg transition-all p-1 sm:p-2",
                     !isCurrentMonth && "calendar-day-other opacity-40",
                     isToday && "calendar-day-current",
                     dayOlympiads.length > 0 && "cursor-pointer hover:bg-secondary/50"
@@ -121,7 +121,7 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
                 >
                   <span
                     className={cn(
-                      "text-sm font-medium mb-1",
+                      "text-xs sm:text-sm font-medium mb-1",
                       isToday && "text-primary"
                     )}
                   >
