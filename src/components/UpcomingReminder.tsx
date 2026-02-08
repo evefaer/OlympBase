@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { AlertCircle, Calendar, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
-import { olympiadsData } from "@/data/olympiads";
+import { useOlympiads } from "@/hooks/useOlympiads";
 import { parseISO, isToday, isTomorrow, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { useState } from "react";
 
 export function UpcomingReminder() {
   const { selectedIds } = useSelectedOlympiads();
+  const { data: olympiadsData = [] } = useOlympiads();
   const [dismissed, setDismissed] = useState(false);
 
   const upcomingOlympiads = useMemo(() => {
@@ -21,7 +22,7 @@ export function UpcomingReminder() {
       const startDate = parseISO(olympiad.startDate);
       return isToday(startDate) || isTomorrow(startDate);
     });
-  }, [selectedIds]);
+  }, [selectedIds, olympiadsData]);
 
   if (upcomingOlympiads.length === 0 || dismissed) return null;
 

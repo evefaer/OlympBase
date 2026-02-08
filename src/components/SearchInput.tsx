@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { olympiadsData } from "@/data/olympiads";
+import { useOlympiads } from "@/hooks/useOlympiads";
 import { cn } from "@/lib/utils";
 import { SubjectIcon } from "@/components/SubjectIcon";
 
@@ -16,6 +16,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const { data: olympiadsData = [] } = useOlympiads();
 
   const suggestions = useMemo(() => {
     if (!value.trim()) return [];
@@ -23,7 +24,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
     return olympiadsData
       .filter((olympiad) => olympiad.title.toLowerCase().includes(query))
       .slice(0, 6);
-  }, [value]);
+  }, [value, olympiadsData]);
 
   useEffect(() => {
     setHighlightedIndex(-1);
