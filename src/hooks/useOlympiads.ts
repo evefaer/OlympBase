@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Subject, Grade, Scale, Olympiad } from "@/data/olympiads";
+import { useCustomOlympiads } from "./useCustomOlympiads";
+import { useMemo } from "react";
 
 interface OlympiadRow {
   id: string;
@@ -41,7 +43,9 @@ function mapRowToOlympiad(row: OlympiadRow): Olympiad {
 }
 
 export function useOlympiads() {
-  return useQuery({
+  const { customOlympiads } = useCustomOlympiads();
+  
+  const query = useQuery({
     queryKey: ["olympiads"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -56,12 +60,35 @@ export function useOlympiads() {
       return (data as OlympiadRow[]).map(mapRowToOlympiad);
     },
   });
+
+  // Merge database olympiads with custom ones
+  const allOlympiads = useMemo(() => {
+    const dbOlympiads = query.data || [];
+    return [...dbOlympiads, ...customOlympiads].sort(
+      (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    );
+  }, [query.data, customOlympiads]);
+
+  return {
+    ...query,
+    data: allOlympiads,
+  };
 }
 
 export function useOlympiad(id: string) {
-  return useQuery({
+  const { customOlympiads } = useCustomOlympiads();
+  
+  // Check if it's a custom olympiad first
+  const customOlympiad = customOlympiads.find((o) => o.id === id);
+  
+  const query = useQuery({
     queryKey: ["olympiad", id],
     queryFn: async () => {
+      // If it's a custom olympiad, return it directly
+      if (id.startsWith("custom-")) {
+        return null;
+      }
+      
       const { data, error } = await supabase
         .from("olympiads")
         .select("*")
@@ -78,5 +105,12 @@ export function useOlympiad(id: string) {
 
       return mapRowToOlympiad(data as OlympiadRow);
     },
+    enabled: !id.startsWith("custom-"),
   });
+
+  return {
+    ...query,
+    data: customOlympiad || query.data,
+    isLoading: id.startsWith("custom-") ? false : query.isLoading,
+  };
 }

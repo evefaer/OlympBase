@@ -3,8 +3,10 @@ import { Header } from "@/components/Header";
 import { FilterPanel, TimeFilter } from "@/components/FilterPanel";
 import { OlympiadCard } from "@/components/OlympiadCard";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
+import { AddOlympiadDialog } from "@/components/AddOlympiadDialog";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { useOlympiads } from "@/hooks/useOlympiads";
+import { useCustomOlympiads } from "@/hooks/useCustomOlympiads";
 import { Subject, Grade, Scale } from "@/data/olympiads";
 import { parseISO, isWithinInterval, isAfter, isBefore, startOfDay } from "date-fns";
 
@@ -22,6 +24,7 @@ const ListPage = () => {
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
   const { data: olympiadsData = [], isLoading } = useOlympiads();
+  const { isCustomOlympiad, deleteOlympiad } = useCustomOlympiads();
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData
@@ -98,13 +101,16 @@ const ListPage = () => {
       <UpcomingReminder />
       
       <main className="container py-8">
-        <div className="mb-6 animate-fade-in">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Список олимпиад
-          </h1>
-          <p className="text-muted-foreground">
-            Найдите олимпиады по вашим интересам и добавьте их в избранное
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 animate-fade-in">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Список олимпиад
+            </h1>
+            <p className="text-muted-foreground">
+              Найдите олимпиады по вашим интересам и добавьте их в избранное
+            </p>
+          </div>
+          <AddOlympiadDialog />
         </div>
 
         <FilterPanel
@@ -138,6 +144,8 @@ const ListPage = () => {
                 olympiad={olympiad}
                 isSelected={isSelected(olympiad.id)}
                 onToggleSelect={toggleSelected}
+                isCustom={isCustomOlympiad(olympiad.id)}
+                onDelete={deleteOlympiad}
               />
             ))}
           </div>

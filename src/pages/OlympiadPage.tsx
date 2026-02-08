@@ -9,7 +9,9 @@ import {
   Clock,
   CheckCircle,
   Award,
-  Building
+  Building,
+  Trash2,
+  User
 } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -18,14 +20,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useOlympiad } from "@/hooks/useOlympiads";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
+import { useCustomOlympiads } from "@/hooks/useCustomOlympiads";
 import { cn } from "@/lib/utils";
 import { SubjectIcon } from "@/components/SubjectIcon";
+import { toast } from "sonner";
 
 const OlympiadPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isSelected, toggleSelected } = useSelectedOlympiads();
   const { data: olympiad, isLoading } = useOlympiad(id || "");
+  const { isCustomOlympiad, deleteOlympiad } = useCustomOlympiads();
+  
+  const isCustom = id ? isCustomOlympiad(id) : false;
 
   if (isLoading) {
     return (
@@ -85,6 +92,12 @@ const OlympiadPage = () => {
             <div className="card-olimpiad">
               <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">
                 <SubjectIcon subject={olympiad.subject} size="md" />
+                {isCustom && (
+                  <Badge variant="secondary" className="text-xs gap-1">
+                    <User className="w-3 h-3" />
+                    Моя олимпиада
+                  </Badge>
+                )}
                 <Badge variant="outline" className="text-xs">{olympiad.scale}</Badge>
                 {olympiad.format && (
                   <Badge variant="outline" className="text-xs">{olympiad.format}</Badge>
@@ -117,6 +130,21 @@ const OlympiadPage = () => {
                       Сайт олимпиады
                     </Button>
                   </a>
+                )}
+
+                {isCustom && (
+                  <Button
+                    variant="destructive"
+                    className="gap-2 w-full sm:w-auto"
+                    onClick={() => {
+                      deleteOlympiad(olympiad.id);
+                      toast.success("Олимпиада удалена");
+                      navigate(-1);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Удалить
+                  </Button>
                 )}
               </div>
             </div>
