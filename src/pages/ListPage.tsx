@@ -4,7 +4,8 @@ import { FilterPanel, TimeFilter } from "@/components/FilterPanel";
 import { OlympiadCard } from "@/components/OlympiadCard";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
-import { olympiadsData, Subject, Grade, Scale } from "@/data/olympiads";
+import { useOlympiads } from "@/hooks/useOlympiads";
+import { Subject, Grade, Scale } from "@/data/olympiads";
 import { parseISO, isWithinInterval, isAfter, isBefore, startOfDay } from "date-fns";
 
 const ListPage = () => {
@@ -20,6 +21,7 @@ const ListPage = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
+  const { data: olympiadsData = [], isLoading } = useOlympiads();
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData
@@ -88,7 +90,7 @@ const ListPage = () => {
         return true;
       })
       .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
-  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, dateRange, searchQuery, timeFilter, isSelected]);
+  }, [olympiadsData, selectedSubjects, selectedGrades, selectedScales, showOnlySelected, dateRange, searchQuery, timeFilter, isSelected]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,7 +126,11 @@ const ListPage = () => {
           onTimeFilterChange={setTimeFilter}
         />
 
-        {filteredOlympiads.length > 0 ? (
+        {isLoading ? (
+          <div className="text-center py-12 text-muted-foreground animate-fade-in">
+            <p className="text-lg">Загрузка олимпиад...</p>
+          </div>
+        ) : filteredOlympiads.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredOlympiads.map((olympiad) => (
               <OlympiadCard

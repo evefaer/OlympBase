@@ -4,7 +4,8 @@ import { FilterPanel, TimeFilter } from "@/components/FilterPanel";
 import { CalendarView } from "@/components/CalendarView";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
-import { olympiadsData, Subject, Grade, Scale } from "@/data/olympiads";
+import { useOlympiads } from "@/hooks/useOlympiads";
+import { Subject, Grade, Scale } from "@/data/olympiads";
 import { parseISO, isBefore, startOfDay } from "date-fns";
 
 const CalendarPage = () => {
@@ -16,6 +17,7 @@ const CalendarPage = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
+  const { data: olympiadsData = [], isLoading } = useOlympiads();
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData.filter((olympiad) => {
@@ -63,7 +65,7 @@ const CalendarPage = () => {
 
       return true;
     });
-  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, searchQuery, timeFilter, isSelected]);
+  }, [olympiadsData, selectedSubjects, selectedGrades, selectedScales, showOnlySelected, searchQuery, timeFilter, isSelected]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,17 +98,25 @@ const CalendarPage = () => {
           onTimeFilterChange={setTimeFilter}
         />
 
-        <CalendarView
-          olympiads={filteredOlympiads}
-          isSelected={isSelected}
-          onToggleSelect={toggleSelected}
-        />
-
-        {filteredOlympiads.length === 0 && (
+        {isLoading ? (
           <div className="text-center py-12 text-muted-foreground animate-fade-in">
-            <p className="text-lg">Нет олимпиад по выбранным фильтрам</p>
-            <p className="text-sm mt-1">Попробуйте изменить параметры поиска</p>
+            <p className="text-lg">Загрузка олимпиад...</p>
           </div>
+        ) : (
+          <>
+            <CalendarView
+              olympiads={filteredOlympiads}
+              isSelected={isSelected}
+              onToggleSelect={toggleSelected}
+            />
+
+            {filteredOlympiads.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground animate-fade-in">
+                <p className="text-lg">Нет олимпиад по выбранным фильтрам</p>
+                <p className="text-sm mt-1">Попробуйте изменить параметры поиска</p>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

@@ -16,7 +16,7 @@ import { ru } from "date-fns/locale";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { olympiadsData } from "@/data/olympiads";
+import { useOlympiad } from "@/hooks/useOlympiads";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { cn } from "@/lib/utils";
 import { SubjectIcon } from "@/components/SubjectIcon";
@@ -25,8 +25,18 @@ const OlympiadPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isSelected, toggleSelected } = useSelectedOlympiads();
-  
-  const olympiad = olympiadsData.find((o) => o.id === id);
+  const { data: olympiad, isLoading } = useOlympiad(id || "");
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container py-12 text-center">
+          <p className="text-lg text-muted-foreground">Загрузка...</p>
+        </main>
+      </div>
+    );
+  }
 
   if (!olympiad) {
     return (
