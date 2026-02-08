@@ -8,7 +8,9 @@ export type Subject =
   | "История" 
   | "Обществознание"
   | "Литература"
-  | "География";
+  | "География"
+  | "Английский язык"
+  | "Искусство";
 
 export type Grade = "5" | "6" | "7" | "8" | "9" | "10" | "11";
 
@@ -42,6 +44,8 @@ export const SUBJECTS: Subject[] = [
   "Обществознание",
   "Литература",
   "География",
+  "Английский язык",
+  "Искусство",
 ];
 
 export const GRADES: Grade[] = ["5", "6", "7", "8", "9", "10", "11"];
@@ -65,6 +69,8 @@ export const SUBJECT_COLORS: Record<Subject, string> = {
   "Обществознание": "bg-cyan-500",
   "Литература": "bg-pink-500",
   "География": "bg-teal-500",
+  "Английский язык": "bg-indigo-500",
+  "Искусство": "bg-rose-500",
 };
 
 export const olympiadsData: Olympiad[] = [
