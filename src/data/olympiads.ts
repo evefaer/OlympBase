@@ -70,7 +70,7 @@ export const SUBJECT_COLORS: Record<Subject, string> = {
   "Литература": "bg-pink-500",
   "География": "bg-teal-500",
   "Английский язык": "bg-indigo-500",
-  "Искусство": "bg-rose-500",
+  "Искусство": "bg-rose-400",
 };
 
 export const olympiadsData: Olympiad[] = [
