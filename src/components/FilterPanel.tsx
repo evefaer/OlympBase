@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { SearchInput } from "@/components/SearchInput";
 
+export type TimeFilter = "all" | "upcoming" | "past";
+
 interface FilterPanelProps {
   selectedSubjects: Subject[];
   selectedGrades: Grade[];
@@ -28,6 +30,8 @@ interface FilterPanelProps {
   onDateRangeChange?: (range: { from: Date | undefined; to: Date | undefined }) => void;
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
+  timeFilter?: TimeFilter;
+  onTimeFilterChange?: (filter: TimeFilter) => void;
 }
 
 export function FilterPanel({
@@ -45,6 +49,8 @@ export function FilterPanel({
   onDateRangeChange,
   searchQuery = "",
   onSearchChange,
+  timeFilter = "all",
+  onTimeFilterChange,
 }: FilterPanelProps) {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
 
@@ -82,6 +88,9 @@ export function FilterPanel({
     if (onSearchChange) {
       onSearchChange("");
     }
+    if (onTimeFilterChange) {
+      onTimeFilterChange("all");
+    }
   };
 
   const hasFilters =
@@ -89,7 +98,8 @@ export function FilterPanel({
     selectedGrades.length > 0 ||
     selectedScales.length > 0 ||
     (dateRange?.from || dateRange?.to) ||
-    searchQuery.trim().length > 0;
+    searchQuery.trim().length > 0 ||
+    timeFilter !== "all";
 
   return (
     <div className="bg-card rounded-xl border border-border p-4 mb-6 animate-fade-in">
@@ -241,6 +251,42 @@ export function FilterPanel({
           </Button>
         )}
       </div>
+
+      {/* Time Filter Toggle */}
+      {onTimeFilterChange && (
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-sm text-muted-foreground">Период:</span>
+          <div className="flex bg-secondary rounded-lg p-1">
+            <button
+              onClick={() => onTimeFilterChange("all")}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                timeFilter === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              )}
+            >
+              Все
+            </button>
+            <button
+              onClick={() => onTimeFilterChange("upcoming")}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                timeFilter === "upcoming" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              )}
+            >
+              Предстоящие
+            </button>
+            <button
+              onClick={() => onTimeFilterChange("past")}
+              className={cn(
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                timeFilter === "past" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              )}
+            >
+              Прошедшие
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* View Mode Toggle */}
       <div className="flex items-center gap-2">
