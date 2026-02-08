@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
-import { FilterPanel } from "@/components/FilterPanel";
+import { FilterPanel, TimeFilter } from "@/components/FilterPanel";
 import { OlympiadCard } from "@/components/OlympiadCard";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { olympiadsData, Subject, Grade, Scale } from "@/data/olympiads";
-import { parseISO, isWithinInterval, isAfter, isBefore } from "date-fns";
+import { parseISO, isWithinInterval, isAfter, isBefore, startOfDay } from "date-fns";
 
 const ListPage = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
@@ -17,6 +17,7 @@ const ListPage = () => {
     to: undefined,
   });
   const [searchQuery, setSearchQuery] = useState("");
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
 
@@ -71,10 +72,23 @@ const ListPage = () => {
           }
         }
 
+        // Filter by time (upcoming/past)
+        if (timeFilter !== "all") {
+          const today = startOfDay(new Date());
+          const olympiadEnd = parseISO(olympiad.endDate);
+          
+          if (timeFilter === "upcoming" && isBefore(olympiadEnd, today)) {
+            return false;
+          }
+          if (timeFilter === "past" && !isBefore(olympiadEnd, today)) {
+            return false;
+          }
+        }
+
         return true;
       })
       .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
-  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, dateRange, searchQuery, isSelected]);
+  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, dateRange, searchQuery, timeFilter, isSelected]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -106,6 +120,8 @@ const ListPage = () => {
           onDateRangeChange={setDateRange}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          timeFilter={timeFilter}
+          onTimeFilterChange={setTimeFilter}
         />
 
         {filteredOlympiads.length > 0 ? (

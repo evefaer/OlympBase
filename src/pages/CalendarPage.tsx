@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
-import { FilterPanel } from "@/components/FilterPanel";
+import { FilterPanel, TimeFilter } from "@/components/FilterPanel";
 import { CalendarView } from "@/components/CalendarView";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { olympiadsData, Subject, Grade, Scale } from "@/data/olympiads";
+import { parseISO, isBefore, startOfDay } from "date-fns";
 
 const CalendarPage = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
@@ -12,6 +13,7 @@ const CalendarPage = () => {
   const [selectedScales, setSelectedScales] = useState<Scale[]>([]);
   const [showOnlySelected, setShowOnlySelected] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
 
@@ -46,9 +48,22 @@ const CalendarPage = () => {
         return false;
       }
 
+      // Filter by time (upcoming/past)
+      if (timeFilter !== "all") {
+        const today = startOfDay(new Date());
+        const olympiadEnd = parseISO(olympiad.endDate);
+        
+        if (timeFilter === "upcoming" && isBefore(olympiadEnd, today)) {
+          return false;
+        }
+        if (timeFilter === "past" && !isBefore(olympiadEnd, today)) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, searchQuery, isSelected]);
+  }, [selectedSubjects, selectedGrades, selectedScales, showOnlySelected, searchQuery, timeFilter, isSelected]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,6 +92,8 @@ const CalendarPage = () => {
           selectedCount={selectedCount}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          timeFilter={timeFilter}
+          onTimeFilterChange={setTimeFilter}
         />
 
         <CalendarView
