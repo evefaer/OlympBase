@@ -75,7 +75,6 @@ const OlympiadPage = () => {
             <div className="card-olimpiad">
               <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">
                 <SubjectIcon subject={olympiad.subject} size="md" />
-                <Badge variant="secondary" className="text-xs">{olympiad.subject}</Badge>
                 <Badge variant="outline" className="text-xs">{olympiad.scale}</Badge>
                 {olympiad.format && (
                   <Badge variant="outline" className="text-xs">{olympiad.format}</Badge>
