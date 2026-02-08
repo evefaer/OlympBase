@@ -78,14 +78,14 @@ const CalendarPage = () => {
       <Header />
       <UpcomingReminder />
       
-      <main className="container py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 animate-fade-in">
+      <main className="container py-4 sm:py-8 px-3 sm:px-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+            <h1 className="text-xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
               Календарь олимпиад
             </h1>
-            <p className="text-muted-foreground">
-              Планируйте участие в олимпиадах и не пропускайте важные даты
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Планируйте участие и не пропускайте важные даты
             </p>
           </div>
           <AddOlympiadDialog />

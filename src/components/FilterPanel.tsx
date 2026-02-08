@@ -106,18 +106,18 @@ export function FilterPanel({
     timeFilter !== "all";
 
   return (
-    <div className="bg-card rounded-xl border border-border p-4 mb-6 animate-fade-in">
+    <div className="bg-card rounded-xl border border-border p-3 sm:p-4 mb-4 sm:mb-6 animate-fade-in">
       {/* Search Input */}
       {onSearchChange && (
-        <div className="mb-4">
+        <div className="mb-3 sm:mb-4">
           <SearchInput value={searchQuery} onChange={onSearchChange} />
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3 mb-4">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Filter className="w-4 h-4" />
-          <span className="text-sm font-medium">Фильтры</span>
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground">
+          <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span className="text-xs sm:text-sm font-medium">Фильтры</span>
         </div>
 
         {/* Subject Filter */}
