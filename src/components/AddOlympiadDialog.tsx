@@ -50,7 +50,6 @@ const formSchema = z.object({
   date: z.date({ required_error: "Выберите дату" }),
   notes: z.string().max(1000, "Заметки слишком длинные").optional(),
   website: z.string().url("Введите корректный URL").optional().or(z.literal("")),
-  organizer: z.string().max(200, "Название организатора слишком длинное").optional(),
   format: z.enum(["Онлайн", "Очный", "Смешанный"]).optional(),
 });
 
@@ -73,7 +72,6 @@ export function AddOlympiadDialog({ trigger }: AddOlympiadDialogProps) {
       scale: "",
       notes: "",
       website: "",
-      organizer: "",
     },
   });
 
@@ -89,7 +87,6 @@ export function AddOlympiadDialog({ trigger }: AddOlympiadDialogProps) {
       description: values.notes || "",
       registrationDeadline: dateStr,
       website: values.website || undefined,
-      organizer: values.organizer || undefined,
       format: values.format || undefined,
     };
 
@@ -281,35 +278,19 @@ export function AddOlympiadDialog({ trigger }: AddOlympiadDialogProps) {
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="website"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Сайт</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="organizer"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Организатор</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Название организации" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="website"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Сайт</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
