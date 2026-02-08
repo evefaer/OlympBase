@@ -254,13 +254,13 @@ export function FilterPanel({
 
       {/* Time Filter Toggle */}
       {onTimeFilterChange && (
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
           <span className="text-sm text-muted-foreground">Период:</span>
-          <div className="flex bg-secondary rounded-lg p-1">
+          <div className="flex bg-secondary rounded-lg p-1 overflow-x-auto">
             <button
               onClick={() => onTimeFilterChange("all")}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap",
                 timeFilter === "all" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
               )}
             >
@@ -269,7 +269,7 @@ export function FilterPanel({
             <button
               onClick={() => onTimeFilterChange("upcoming")}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap",
                 timeFilter === "upcoming" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
               )}
             >
@@ -278,7 +278,7 @@ export function FilterPanel({
             <button
               onClick={() => onTimeFilterChange("past")}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap",
                 timeFilter === "past" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
               )}
             >
@@ -289,13 +289,13 @@ export function FilterPanel({
       )}
 
       {/* View Mode Toggle */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <span className="text-sm text-muted-foreground">Показать:</span>
-        <div className="flex bg-secondary rounded-lg p-1">
+        <div className="flex bg-secondary rounded-lg p-1 overflow-x-auto">
           <button
             onClick={() => onShowOnlySelectedChange(false)}
             className={cn(
-              "px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
+              "px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap",
               !showOnlySelected ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
             )}
           >
@@ -304,7 +304,7 @@ export function FilterPanel({
           <button
             onClick={() => onShowOnlySelectedChange(true)}
             className={cn(
-              "px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5",
+              "px-3 sm:px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap",
               showOnlySelected ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
             )}
           >
