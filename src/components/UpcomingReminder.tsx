@@ -1,28 +1,20 @@
-import { useMemo } from "react";
-import { Link } from "react-router-dom";
-import { AlertCircle, Calendar, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AlertCircle, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { useOlympiads } from "@/hooks/useOlympiads";
-import { parseISO, isToday, isTomorrow, format } from "date-fns";
-import { ru } from "date-fns/locale";
+import { parseISO, isToday, isTomorrow } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 export function UpcomingReminder() {
-  const { selectedIds } = useSelectedOlympiads();
   const { data: olympiadsData = [] } = useOlympiads();
   const [dismissed, setDismissed] = useState(false);
 
   const upcomingOlympiads = useMemo(() => {
-    if (selectedIds.length === 0) return [];
-
     return olympiadsData.filter((olympiad) => {
-      if (!selectedIds.includes(olympiad.id)) return false;
       const startDate = parseISO(olympiad.startDate);
       return isToday(startDate) || isTomorrow(startDate);
     });
-  }, [selectedIds, olympiadsData]);
+  }, [olympiadsData]);
 
   if (upcomingOlympiads.length === 0 || dismissed) return null;
 
