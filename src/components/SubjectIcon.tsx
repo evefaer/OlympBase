@@ -43,21 +43,21 @@ export function SubjectIcon({
   const Icon = SUBJECT_ICONS[subject];
   
   const sizeClasses = {
-    sm: "w-8 h-8",
-    md: "w-10 h-10",
-    lg: "w-14 h-14",
+    sm: "w-10 h-10",
+    md: "w-14 h-14",
+    lg: "w-20 h-20",
   };
   
   const containerSizes = {
-    sm: "w-9 h-9",
-    md: "w-12 h-12",
-    lg: "w-16 h-16",
+    sm: "w-11 h-11",
+    md: "w-16 h-16",
+    lg: "w-24 h-24",
   };
 
   const iconSizes = {
-    sm: 20,
-    md: 28,
-    lg: 36,
+    sm: 24,
+    md: 36,
+    lg: 52,
   };
 
   if (!showBackground) {

@@ -112,7 +112,7 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
               <PopoverTrigger asChild>
                 <button
                   className={cn(
-                    "calendar-day min-h-[50px] sm:min-h-[80px] border border-transparent hover:border-border rounded-lg transition-all p-1 sm:p-2",
+                    "calendar-day min-h-[80px] sm:min-h-[120px] border border-transparent hover:border-border rounded-lg transition-all p-2 sm:p-3",
                     !isCurrentMonth && "calendar-day-other opacity-40",
                     isToday && "calendar-day-current",
                     dayOlympiads.length > 0 && "cursor-pointer hover:bg-secondary/50"
@@ -127,17 +127,17 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
                   >
                     {format(day, "d")}
                   </span>
-                  <div className="flex flex-wrap gap-0.5 mt-1">
-                    {dayOlympiads.slice(0, 3).map((olympiad) => (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {dayOlympiads.slice(0, 2).map((olympiad) => (
                       <SubjectIcon
                         key={olympiad.id}
                         subject={olympiad.subject}
-                        size="sm"
+                        size="md"
                       />
                     ))}
-                    {dayOlympiads.length > 3 && (
-                      <span className="text-[10px] text-muted-foreground ml-0.5">
-                        +{dayOlympiads.length - 3}
+                    {dayOlympiads.length > 2 && (
+                      <span className="text-xs text-muted-foreground font-medium self-end">
+                        +{dayOlympiads.length - 2}
                       </span>
                     )}
                   </div>
