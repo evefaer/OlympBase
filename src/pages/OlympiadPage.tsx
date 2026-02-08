@@ -16,9 +16,10 @@ import { ru } from "date-fns/locale";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { olympiadsData, SUBJECT_COLORS } from "@/data/olympiads";
+import { olympiadsData } from "@/data/olympiads";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { cn } from "@/lib/utils";
+import { SubjectIcon } from "@/components/SubjectIcon";
 
 const OlympiadPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,8 +73,8 @@ const OlympiadPage = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <div className="card-olimpiad">
-              <div className="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
-                <span className={cn("w-3 h-3 rounded-full", SUBJECT_COLORS[olympiad.subject])} />
+              <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">
+                <SubjectIcon subject={olympiad.subject} size="md" />
                 <Badge variant="secondary" className="text-xs">{olympiad.subject}</Badge>
                 <Badge variant="outline" className="text-xs">{olympiad.scale}</Badge>
                 {olympiad.format && (
