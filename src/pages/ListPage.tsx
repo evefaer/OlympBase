@@ -20,7 +20,7 @@ const ListPage = () => {
     to: undefined,
   });
   const [searchQuery, setSearchQuery] = useState("");
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>("upcoming");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
   const { data: olympiadsData = [], isLoading } = useOlympiads();
