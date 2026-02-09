@@ -93,7 +93,7 @@ export function FilterPanel({
       onSearchChange("");
     }
     if (onTimeFilterChange) {
-      onTimeFilterChange("all");
+      onTimeFilterChange("upcoming");
     }
   };
 
