@@ -19,8 +19,8 @@ interface ParsedOlympiad {
   format: string | null;
 }
 
-// Subject-specific pages on olimpiada.ru for more complete coverage
-const SUBJECT_PAGES = [
+// olimpiada.ru subject pages
+const OLIMPIADA_RU_PAGES = [
   { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=1&class=any&period_date=&period=year', subject: 'Математика' },
   { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=2&class=any&period_date=&period=year', subject: 'Физика' },
   { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=3&class=any&period_date=&period=year', subject: 'Информатика' },
@@ -32,97 +32,150 @@ const SUBJECT_PAGES = [
   { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=9&class=any&period_date=&period=year', subject: 'Обществознание' },
   { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=10&class=any&period_date=&period=year', subject: 'География' },
   { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=11&class=any&period_date=&period=year', subject: 'Английский язык' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=12&class=any&period_date=&period=year', subject: 'Экономика' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=13&class=any&period_date=&period=year', subject: 'Право' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=14&class=any&period_date=&period=year', subject: 'Астрономия' },
+  { url: 'https://olimpiada.ru/activities?type=any&subject%5B%5D=15&class=any&period_date=&period=year', subject: 'Экология' },
 ];
 
-async function scrapeSubjectPage(
-  apiKey: string, 
-  pageUrl: string, 
-  defaultSubject: string
+// postupi.online olympiad pages
+const POSTUPI_ONLINE_PAGES = [
+  { url: 'https://postupi.online/olimpiady/predmet-matematika/', subject: 'Математика' },
+  { url: 'https://postupi.online/olimpiady/predmet-fizika/', subject: 'Физика' },
+  { url: 'https://postupi.online/olimpiady/predmet-informatika/', subject: 'Информатика' },
+  { url: 'https://postupi.online/olimpiady/predmet-himiya/', subject: 'Химия' },
+  { url: 'https://postupi.online/olimpiady/predmet-biologiya/', subject: 'Биология' },
+  { url: 'https://postupi.online/olimpiady/predmet-russkiy-yazyk/', subject: 'Русский язык' },
+  { url: 'https://postupi.online/olimpiady/predmet-literatura/', subject: 'Литература' },
+  { url: 'https://postupi.online/olimpiady/predmet-istoriya/', subject: 'История' },
+  { url: 'https://postupi.online/olimpiady/predmet-obschestvoznanie/', subject: 'Обществознание' },
+  { url: 'https://postupi.online/olimpiady/predmet-geografiya/', subject: 'География' },
+  { url: 'https://postupi.online/olimpiady/predmet-angliyskiy-yazyk/', subject: 'Английский язык' },
+  { url: 'https://postupi.online/olimpiady/predmet-ekonomika/', subject: 'Экономика' },
+  { url: 'https://postupi.online/olimpiady/predmet-pravo/', subject: 'Право' },
+  { url: 'https://postupi.online/olimpiady/predmet-astronomiya/', subject: 'Астрономия' },
+  { url: 'https://postupi.online/olimpiady/predmet-ekologiya/', subject: 'Экология' },
+];
+
+const EXTRACT_PROMPT = `Extract ALL olympiads/competitions from this page. Be as thorough as possible — extract every single one.
+
+For each olympiad extract:
+- title: the exact full name of the olympiad (required)
+- subject: the subject/discipline (required)
+- grades: array of grade numbers as strings (like ["9", "10", "11"]). Extract from the page, or use ["5","6","7","8","9","10","11"] if not specified
+- scale: "Всероссийская" for national, "Региональная" for regional, "Международная" for international, "Межрегиональная" for multi-regional
+- startDate: start date in YYYY-MM-DD format (required)
+- endDate: end date in YYYY-MM-DD format (required)
+- registrationDeadline: registration deadline in YYYY-MM-DD format (use startDate minus 1 week if not specified)
+- description: brief description 1-2 sentences
+- website: official website URL if available (null if not found)
+- organizer: organizing institution (null if not found)
+- format: "Очная", "Заочная", "Онлайн", or "Смешанная" (null if unclear)
+
+IMPORTANT: Extract EVERY olympiad on the page. Do not skip any. Include upcoming, ongoing, and recently finished ones.`;
+
+const EXTRACT_SCHEMA = {
+  type: 'object',
+  properties: {
+    olympiads: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          subject: { type: 'string' },
+          grades: { type: 'array', items: { type: 'string' } },
+          scale: { type: 'string' },
+          startDate: { type: 'string' },
+          endDate: { type: 'string' },
+          registrationDeadline: { type: 'string' },
+          description: { type: 'string' },
+          website: { type: 'string' },
+          organizer: { type: 'string' },
+          format: { type: 'string' },
+        },
+        required: ['title', 'subject', 'grades', 'scale', 'startDate', 'endDate', 'registrationDeadline', 'description'],
+      },
+    },
+  },
+  required: ['olympiads'],
+};
+
+function isOlderThanOneMonth(endDate: string): boolean {
+  const end = new Date(endDate);
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  return end < cutoff;
+}
+
+function getCutoffDateISO(): string {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  return cutoff.toISOString().split('T')[0];
+}
+
+async function scrapePage(
+  apiKey: string,
+  pageUrl: string,
+  defaultSubject: string,
 ): Promise<ParsedOlympiad[]> {
-  console.log(`Scraping page for ${defaultSubject}: ${pageUrl}`);
-  
+  console.log(`Scraping: ${defaultSubject} — ${pageUrl}`);
   try {
-    const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+    const res = await fetch('https://api.firecrawl.dev/v1/scrape', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         url: pageUrl,
         formats: ['markdown', 'extract'],
         extract: {
-          prompt: `Extract all olympiads/competitions from this page. The page is filtered for ${defaultSubject} subject.
-            
-            For each olympiad extract:
-            - title: the exact name of the olympiad (required)
-            - subject: use "${defaultSubject}" as the subject
-            - grades: array of grade numbers as strings (like ["9", "10", "11"]), extract from the page or use ["5", "6", "7", "8", "9", "10", "11"] if not specified
-            - scale: the level - "Всероссийская" for national, "Региональная" for regional, "Международная" for international, "Межрегиональная" for multi-regional
-            - startDate: start date in YYYY-MM-DD format (required, use current month if not clear)
-            - endDate: end date in YYYY-MM-DD format (required, use 1-2 weeks after start if not clear)
-            - registrationDeadline: registration deadline in YYYY-MM-DD format (use startDate minus 1 week if not specified)
-            - description: brief description of the olympiad (1-2 sentences about what it is)
-            - website: official website URL if available (null if not found)
-            - organizer: organizing institution if mentioned (null if not found)
-            - format: format of the olympiad - "Очная" for in-person, "Заочная" for correspondence, "Онлайн" for online, "Смешанная" for mixed (null if not clear)
-            
-            IMPORTANT: Extract ALL olympiads visible on the page. Include both upcoming and currently running olympiads.
-            Return an array of olympiad objects. Be thorough and extract as many as possible.`,
-          schema: {
-            type: 'object',
-            properties: {
-              olympiads: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    title: { type: 'string' },
-                    subject: { type: 'string' },
-                    grades: { type: 'array', items: { type: 'string' } },
-                    scale: { type: 'string' },
-                    startDate: { type: 'string' },
-                    endDate: { type: 'string' },
-                    registrationDeadline: { type: 'string' },
-                    description: { type: 'string' },
-                    website: { type: 'string' },
-                    organizer: { type: 'string' },
-                    format: { type: 'string' }
-                  },
-                  required: ['title', 'subject', 'grades', 'scale', 'startDate', 'endDate', 'registrationDeadline', 'description']
-                }
-              }
-            },
-            required: ['olympiads']
-          }
+          prompt: `${EXTRACT_PROMPT}\nThe page is filtered for subject: ${defaultSubject}. Use "${defaultSubject}" as the subject value.`,
+          schema: EXTRACT_SCHEMA,
         },
         onlyMainContent: true,
-        waitFor: 5000, // Increased wait time for better page loading
+        waitFor: 5000,
       }),
     });
 
-    if (!scrapeResponse.ok) {
-      const errorData = await scrapeResponse.json();
-      console.error(`Failed to scrape ${defaultSubject}:`, errorData);
+    if (!res.ok) {
+      const err = await res.json();
+      console.error(`Failed ${defaultSubject}:`, err);
       return [];
     }
 
-    const scrapeData = await scrapeResponse.json();
-    const extractData = scrapeData.data?.extract || scrapeData.extract;
-    const olympiads: ParsedOlympiad[] = extractData?.olympiads || [];
-    
-    // Ensure subject is set correctly
-    const olympiadsWithSubject = olympiads.map(o => ({
+    const data = await res.json();
+    const extract = data.data?.extract || data.extract;
+    const olympiads: ParsedOlympiad[] = (extract?.olympiads || []).map((o: ParsedOlympiad) => ({
       ...o,
       subject: o.subject || defaultSubject,
     }));
 
-    console.log(`Found ${olympiadsWithSubject.length} olympiads for ${defaultSubject}`);
-    return olympiadsWithSubject;
-  } catch (error) {
-    console.error(`Error scraping ${defaultSubject}:`, error);
+    console.log(`Found ${olympiads.length} for ${defaultSubject}`);
+    return olympiads;
+  } catch (e) {
+    console.error(`Error scraping ${defaultSubject}:`, e);
     return [];
   }
+}
+
+async function scrapeInBatches(
+  apiKey: string,
+  pages: { url: string; subject: string }[],
+  batchSize: number,
+): Promise<ParsedOlympiad[]> {
+  const all: ParsedOlympiad[] = [];
+  for (let i = 0; i < pages.length; i += batchSize) {
+    const batch = pages.slice(i, i + batchSize);
+    console.log(`Batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(pages.length / batchSize)}`);
+    const results = await Promise.all(batch.map((p) => scrapePage(apiKey, p.url, p.subject)));
+    results.forEach((r) => all.push(...r));
+    if (i + batchSize < pages.length) {
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+  }
+  return all;
 }
 
 Deno.serve(async (req) => {
@@ -133,105 +186,81 @@ Deno.serve(async (req) => {
   try {
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
-      console.error('FIRECRAWL_API_KEY not configured');
       return new Response(
         JSON.stringify({ success: false, error: 'Firecrawl connector not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
     if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('Supabase credentials not configured');
       return new Response(
         JSON.stringify({ success: false, error: 'Database not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       );
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Parse request body for optional parameters
-    let subjectsToScrape = SUBJECT_PAGES;
+    // Optional subject filter from request body
+    let filterSubjects: string[] | null = null;
     try {
       const body = await req.json();
       if (body.subjects && Array.isArray(body.subjects)) {
-        // Filter to only requested subjects
-        subjectsToScrape = SUBJECT_PAGES.filter(p => 
-          body.subjects.includes(p.subject)
-        );
+        filterSubjects = body.subjects;
       }
     } catch {
-      // No body or invalid JSON, use all subjects
+      // no body
     }
 
-    console.log(`Starting olympiad parsing for ${subjectsToScrape.length} subjects`);
-    console.log('Subjects:', subjectsToScrape.map(s => s.subject).join(', '));
+    const olimpiadaPages = filterSubjects
+      ? OLIMPIADA_RU_PAGES.filter((p) => filterSubjects!.includes(p.subject))
+      : OLIMPIADA_RU_PAGES;
 
-    // Scrape pages in batches to avoid rate limiting
-    const BATCH_SIZE = 3;
-    const allOlympiads: ParsedOlympiad[] = [];
-    
-    for (let i = 0; i < subjectsToScrape.length; i += BATCH_SIZE) {
-      const batch = subjectsToScrape.slice(i, i + BATCH_SIZE);
-      console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(subjectsToScrape.length / BATCH_SIZE)}`);
-      
-      const batchResults = await Promise.all(
-        batch.map(page => scrapeSubjectPage(apiKey, page.url, page.subject))
-      );
-      
-      batchResults.forEach(olympiads => {
-        allOlympiads.push(...olympiads);
-      });
-      
-      // Small delay between batches to avoid rate limiting
-      if (i + BATCH_SIZE < subjectsToScrape.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
+    const postupiPages = filterSubjects
+      ? POSTUPI_ONLINE_PAGES.filter((p) => filterSubjects!.includes(p.subject))
+      : POSTUPI_ONLINE_PAGES;
 
-    console.log(`Total olympiads scraped: ${allOlympiads.length}`);
+    console.log(`Scraping ${olimpiadaPages.length} olimpiada.ru + ${postupiPages.length} postupi.online pages`);
 
-    // Validate and clean up the data
-    const validOlympiads = allOlympiads.filter((o: ParsedOlympiad) => {
-      const isValid = o.title && o.subject && o.grades?.length > 0 && o.startDate && o.endDate;
-      if (!isValid) {
-        console.log(`Invalid olympiad skipped: ${o.title || 'no title'}`);
-      }
-      return isValid;
-    });
+    // Scrape both sources
+    const [olimpiadaResults, postupiResults] = await Promise.all([
+      scrapeInBatches(apiKey, olimpiadaPages, 3),
+      scrapeInBatches(apiKey, postupiPages, 3),
+    ]);
 
-    console.log(`${validOlympiads.length} olympiads passed validation`);
+    const allOlympiads = [...olimpiadaResults, ...postupiResults];
+    console.log(`Total scraped: ${allOlympiads.length} (olimpiada.ru: ${olimpiadaResults.length}, postupi.online: ${postupiResults.length})`);
 
-    // Deduplicate by title (case-insensitive)
-    const seenTitles = new Set<string>();
-    const uniqueOlympiads = validOlympiads.filter(o => {
-      const titleLower = o.title.toLowerCase().trim();
-      if (seenTitles.has(titleLower)) {
-        return false;
-      }
-      seenTitles.add(titleLower);
+    // Validate
+    const valid = allOlympiads.filter((o) => o.title && o.subject && o.grades?.length > 0 && o.startDate && o.endDate);
+    console.log(`Valid: ${valid.length}`);
+
+    // Filter out olympiads older than 1 month
+    const fresh = valid.filter((o) => !isOlderThanOneMonth(o.endDate));
+    console.log(`After date filter (not older than 1 month): ${fresh.length}`);
+
+    // Deduplicate by title
+    const seen = new Set<string>();
+    const unique = fresh.filter((o) => {
+      const key = o.title.toLowerCase().trim();
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     });
+    console.log(`Unique: ${unique.length}`);
 
-    console.log(`${uniqueOlympiads.length} unique olympiads after deduplication`);
+    // Get existing titles to skip duplicates
+    const { data: existing } = await supabase.from('olympiads').select('title');
+    const existingTitles = new Set((existing || []).map((o: { title: string }) => o.title.toLowerCase().trim()));
 
-    // Get existing olympiads to avoid duplicates in database
-    const { data: existingOlympiads } = await supabase
-      .from('olympiads')
-      .select('title');
-    
-    const existingTitles = new Set((existingOlympiads || []).map(o => o.title.toLowerCase().trim()));
-
-    // Filter out duplicates and prepare for insertion
-    const newOlympiads = uniqueOlympiads
-      .filter(o => !existingTitles.has(o.title.toLowerCase().trim()))
-      .map(o => ({
+    const newOlympiads = unique
+      .filter((o) => !existingTitles.has(o.title.toLowerCase().trim()))
+      .map((o) => ({
         title: o.title.trim(),
         subject: o.subject,
-        grades: o.grades.map(g => String(g).trim()),
+        grades: o.grades.map((g) => String(g).trim()),
         scale: o.scale || 'Всероссийская',
         start_date: o.startDate,
         end_date: o.endDate,
@@ -242,57 +271,57 @@ Deno.serve(async (req) => {
         format: o.format || null,
       }));
 
-    console.log(`${newOlympiads.length} new olympiads to insert (${uniqueOlympiads.length - newOlympiads.length} already exist in database)`);
+    console.log(`New to insert: ${newOlympiads.length}`);
 
+    // Insert in chunks of 50
     let insertedCount = 0;
-    if (newOlympiads.length > 0) {
-      const { data: inserted, error: insertError } = await supabase
-        .from('olympiads')
-        .insert(newOlympiads)
-        .select();
-
-      if (insertError) {
-        console.error('Error inserting olympiads:', insertError);
-        return new Response(
-          JSON.stringify({ success: false, error: `Database insert failed: ${insertError.message}` }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+    for (let i = 0; i < newOlympiads.length; i += 50) {
+      const chunk = newOlympiads.slice(i, i + 50);
+      const { data: inserted, error } = await supabase.from('olympiads').insert(chunk).select();
+      if (error) {
+        console.error(`Insert error at chunk ${i}:`, error);
+      } else {
+        insertedCount += inserted?.length || 0;
       }
-
-      insertedCount = inserted?.length || 0;
-      console.log(`Successfully inserted ${insertedCount} olympiads into database`);
     }
+    console.log(`Inserted: ${insertedCount}`);
 
-    // Log summary by subject
-    const bySubject = new Map<string, number>();
-    uniqueOlympiads.forEach(o => {
-      bySubject.set(o.subject, (bySubject.get(o.subject) || 0) + 1);
+    // Cleanup: remove olympiads older than 1 month from DB
+    const cutoffDate = getCutoffDateISO();
+    const { count: deletedCount } = await supabase
+      .from('olympiads')
+      .delete({ count: 'exact' })
+      .lt('end_date', cutoffDate);
+    console.log(`Cleaned up ${deletedCount || 0} expired olympiads (end_date < ${cutoffDate})`);
+
+    // Summary by subject
+    const bySubject: Record<string, number> = {};
+    unique.forEach((o) => {
+      bySubject[o.subject] = (bySubject[o.subject] || 0) + 1;
     });
-    console.log('Olympiads by subject:', Object.fromEntries(bySubject));
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         data: {
           totalScraped: allOlympiads.length,
-          validated: validOlympiads.length,
-          unique: uniqueOlympiads.length,
+          validated: valid.length,
+          fresh: fresh.length,
+          unique: unique.length,
           inserted: insertedCount,
-          skippedDuplicates: uniqueOlympiads.length - newOlympiads.length,
-          bySubject: Object.fromEntries(bySubject),
+          cleaned: deletedCount || 0,
+          bySubject,
+          sources: ['olimpiada.ru', 'postupi.online'],
           parsedAt: new Date().toISOString(),
-          source: 'olimpiada.ru',
-          subjectsParsed: subjectsToScrape.map(s => s.subject),
-        }
+        },
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   } catch (error) {
-    console.error('Error parsing olympiads:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to parse olympiads';
+    console.error('Error:', error);
     return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Failed to parse' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }
 });
