@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Rocket, Calendar, List, Moon, Sun, Menu, X } from "lucide-react";
+import { Rocket, Calendar, List, Moon, Sun, Menu, X, Bell, BellRing } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { useNotificationMode } from "@/hooks/useNotificationMode";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const navItems = [
   { path: "/", label: "Главная", icon: null },
@@ -15,6 +17,7 @@ export function Header() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mode, toggleMode } = useNotificationMode();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-md">
@@ -48,6 +51,26 @@ export function Header() {
             })}
           </nav>
 
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMode}
+                className="rounded-lg"
+              >
+                {mode === "all" ? (
+                  <Bell className="h-5 w-5" />
+                ) : (
+                  <BellRing className="h-5 w-5 text-primary" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {mode === "all" ? "Уведомления: все олимпиады" : "Уведомления: только избранные"}
+            </TooltipContent>
+          </Tooltip>
+
           <Button
             variant="ghost"
             size="icon"
@@ -61,7 +84,27 @@ export function Header() {
         </div>
 
         {/* Mobile Controls */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex md:hidden items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMode}
+                className="rounded-lg h-9 w-9"
+              >
+                {mode === "all" ? (
+                  <Bell className="h-4 w-4" />
+                ) : (
+                  <BellRing className="h-4 w-4 text-primary" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {mode === "all" ? "Уведомления: все олимпиады" : "Уведомления: только избранные"}
+            </TooltipContent>
+          </Tooltip>
+
           <Button
             variant="ghost"
             size="icon"
