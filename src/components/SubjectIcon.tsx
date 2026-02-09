@@ -13,6 +13,14 @@ import {
   Palette,
   HelpCircle,
   LucideIcon,
+  TrendingUp,
+  Scale as ScaleIcon,
+  Telescope,
+  TreePine,
+  GraduationCap,
+  Wrench,
+  ShieldAlert,
+  Dumbbell,
 } from "lucide-react";
 import { Subject, SUBJECT_COLORS } from "@/data/olympiads";
 import { cn } from "@/lib/utils";
@@ -30,6 +38,16 @@ const SUBJECT_ICONS: Record<string, LucideIcon> = {
   "География": Globe,
   "Английский язык": Languages,
   "Искусство": Palette,
+  "Экономика": TrendingUp,
+  "Право": ScaleIcon,
+  "Астрономия": Telescope,
+  "Экология": TreePine,
+  "Немецкий язык": GraduationCap,
+  "Французский язык": GraduationCap,
+  "Китайский язык": GraduationCap,
+  "Технология": Wrench,
+  "ОБЖ": ShieldAlert,
+  "Физкультура": Dumbbell,
 };
 
 const DEFAULT_ICON = HelpCircle;
