@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { Star, Calendar, Users, MapPin, Trash2, User } from "lucide-react";
+import { Star, Calendar, Users, MapPin, Trash2, User, CalendarPlus } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Olympiad } from "@/data/olympiads";
 import { cn } from "@/lib/utils";
 import { SubjectIcon } from "@/components/SubjectIcon";
 import { Badge } from "@/components/ui/badge";
+import { getGoogleCalendarUrl } from "@/lib/calendarExport";
 
 interface OlympiadCardProps {
   olympiad: Olympiad;
@@ -53,6 +54,16 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, o
               <Trash2 className="w-4 h-4" />
             </button>
           )}
+          <a
+            href={getGoogleCalendarUrl(olympiad)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="p-1.5 rounded-lg bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+            aria-label="Добавить в Google Calendar"
+          >
+            <CalendarPlus className="w-4 h-4" />
+          </a>
           <button
             onClick={(e) => {
               e.preventDefault();
