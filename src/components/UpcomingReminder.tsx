@@ -4,17 +4,24 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useOlympiads } from "@/hooks/useOlympiads";
 import { parseISO, isToday, isTomorrow } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { useNotificationMode } from "@/hooks/useNotificationMode";
+import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 
 export function UpcomingReminder() {
   const { data: olympiadsData = [] } = useOlympiads();
   const [dismissed, setDismissed] = useState(false);
+  const { mode } = useNotificationMode();
+  const { isSelected } = useSelectedOlympiads();
 
   const upcomingOlympiads = useMemo(() => {
     return olympiadsData.filter((olympiad) => {
       const startDate = parseISO(olympiad.startDate);
-      return isToday(startDate) || isTomorrow(startDate);
+      const isUpcoming = isToday(startDate) || isTomorrow(startDate);
+      if (!isUpcoming) return false;
+      if (mode === "selected" && !isSelected(olympiad.id)) return false;
+      return true;
     });
-  }, [olympiadsData]);
+  }, [olympiadsData, mode, isSelected]);
 
   if (upcomingOlympiads.length === 0 || dismissed) return null;
 
