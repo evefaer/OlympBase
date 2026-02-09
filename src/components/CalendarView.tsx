@@ -49,14 +49,24 @@ export function CalendarView({ olympiads, isSelected, onToggleSelect }: Calendar
     olympiads.forEach((olympiad) => {
       const start = parseISO(olympiad.startDate);
       const end = parseISO(olympiad.endDate);
+      const rangeDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
       
-      const daysInRange = eachDayOfInterval({ start, end });
-      daysInRange.forEach((day) => {
+      // For short events (≤3 days), show on every day
+      // For longer events, show only on start and end dates
+      const daysToShow = rangeDays <= 3
+        ? eachDayOfInterval({ start, end })
+        : [start, end];
+      
+      daysToShow.forEach((day) => {
         const dateKey = format(day, "yyyy-MM-dd");
         if (!map.has(dateKey)) {
           map.set(dateKey, []);
         }
-        map.get(dateKey)!.push(olympiad);
+        // Avoid adding the same olympiad twice on the same day (when start === end)
+        const existing = map.get(dateKey)!;
+        if (!existing.some(o => o.id === olympiad.id)) {
+          existing.push(olympiad);
+        }
       });
     });
     
