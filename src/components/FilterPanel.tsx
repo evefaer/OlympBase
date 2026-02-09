@@ -312,7 +312,7 @@ export function FilterPanel({
               viewMode === "selected" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
             )}
           >
-            Выбранные
+            Избранные
             {selectedCount > 0 && (
               <span className="bg-warning text-warning-foreground text-xs px-1.5 py-0.5 rounded-full">
                 {selectedCount}
