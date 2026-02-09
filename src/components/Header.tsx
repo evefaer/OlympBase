@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { useNotificationMode } from "@/hooks/useNotificationMode";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 const navItems = [
   { path: "/", label: "Главная", icon: null },
@@ -18,6 +19,14 @@ export function Header() {
   const { theme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { mode, toggleMode } = useNotificationMode();
+
+  const handleToggleMode = () => {
+    toggleMode();
+    const newMode = mode === "all" ? "selected" : "all";
+    toast(newMode === "all" ? "Уведомления: все олимпиады" : "Уведомления: только избранные", {
+      description: newMode === "all" ? "Напоминания обо всех предстоящих олимпиадах" : "Напоминания только об избранных олимпиадах",
+    });
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-md">
@@ -56,7 +65,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={toggleMode}
+                onClick={handleToggleMode}
                 className="rounded-lg"
               >
                 {mode === "all" ? (
@@ -90,7 +99,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={toggleMode}
+                onClick={handleToggleMode}
                 className="rounded-lg h-9 w-9"
               >
                 {mode === "all" ? (
