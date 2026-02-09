@@ -240,7 +240,7 @@ export function FilterPanel({
                 defaultMonth={dateRange?.from}
                 selected={{ from: dateRange?.from, to: dateRange?.to }}
                 onSelect={(range) => onDateRangeChange({ from: range?.from, to: range?.to })}
-                numberOfMonths={2}
+                numberOfMonths={1}
                 locale={ru}
                 className="pointer-events-auto"
               />
