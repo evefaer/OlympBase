@@ -11,7 +11,9 @@ import {
   Award,
   Building,
   Trash2,
-  User
+  User,
+  CalendarPlus,
+  Download
 } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -24,6 +26,7 @@ import { useCustomOlympiads } from "@/hooks/useCustomOlympiads";
 import { cn } from "@/lib/utils";
 import { SubjectIcon } from "@/components/SubjectIcon";
 import { toast } from "sonner";
+import { getGoogleCalendarUrl, downloadIcsFile } from "@/lib/calendarExport";
 
 const OlympiadPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -121,6 +124,30 @@ const OlympiadPage = () => {
                 >
                   <Star className={cn("w-4 h-4", selected && "fill-current")} />
                   {selected ? "В избранном" : "В избранное"}
+                </Button>
+
+                <a
+                  href={getGoogleCalendarUrl(olympiad)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto"
+                >
+                  <Button variant="outline" className="gap-2 w-full">
+                    <CalendarPlus className="w-4 h-4" />
+                    Google Calendar
+                  </Button>
+                </a>
+
+                <Button
+                  variant="outline"
+                  className="gap-2 w-full sm:w-auto"
+                  onClick={() => {
+                    downloadIcsFile(olympiad);
+                    toast.success("Файл .ics скачан");
+                  }}
+                >
+                  <Download className="w-4 h-4" />
+                  Скачать .ics
                 </Button>
 
                 {olympiad.website && (
