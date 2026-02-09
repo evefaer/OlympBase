@@ -29,18 +29,12 @@ const OLIMPIADA_SUBJECTS: Record<number, string> = {
   19: 'Искусство', 20: 'Технология', 21: 'ОБЖ', 22: 'Физкультура',
 };
 
-// Generate olimpiada.ru pages with pagination (page 1 and 2 for each subject)
 function getOlimpiadaPages(filterSubjects?: string[]): { url: string; subject: string }[] {
   const pages: { url: string; subject: string }[] = [];
   for (const [id, subject] of Object.entries(OLIMPIADA_SUBJECTS)) {
     if (filterSubjects && !filterSubjects.includes(subject)) continue;
-    // Page 1 (default) and page 2 for more coverage
     pages.push({
       url: `https://olimpiada.ru/activities?type=any&subject%5B%5D=${id}&class=any&period_date=&period=year`,
-      subject,
-    });
-    pages.push({
-      url: `https://olimpiada.ru/activities?type=any&subject%5B%5D=${id}&class=any&period_date=&period=year&page=2`,
       subject,
     });
   }
@@ -64,9 +58,7 @@ function getPostupiPages(filterSubjects?: string[]): { url: string; subject: str
   const pages: { url: string; subject: string }[] = [];
   for (const [slug, subject] of Object.entries(POSTUPI_SUBJECTS)) {
     if (filterSubjects && !filterSubjects.includes(subject)) continue;
-    // Main listing + page 2
     pages.push({ url: `https://postupi.online/olimpiady/predmet-${slug}/`, subject });
-    pages.push({ url: `https://postupi.online/olimpiady/predmet-${slug}/stranica-2/`, subject });
   }
   return pages;
 }
@@ -152,7 +144,7 @@ async function scrapePage(
           schema: EXTRACT_SCHEMA,
         },
         onlyMainContent: false, // scrape full page for maximum coverage
-        waitFor: 8000, // longer wait for JS-heavy pages
+        waitFor: 3000,
       }),
     });
 
