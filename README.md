@@ -1,6 +1,8 @@
-# 🚀 OlympBase
+# 🚀 [OlympBase](https://olympbase.vercel.app)
 
 **Агрегатор олимпиад** — удобный сервис для поиска и отслеживания школьных олимпиад в России.
+
+🔗 **Сайт:** [olympbase.vercel.app](https://olympbase.vercel.app)
 
 ## Возможности
 
