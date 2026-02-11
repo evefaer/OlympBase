@@ -1,3 +1,4 @@
+import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Star, Calendar, Users, MapPin, Trash2, User, CalendarPlus } from "lucide-react";
 import { format, parseISO } from "date-fns";
@@ -17,6 +18,25 @@ interface OlympiadCardProps {
 }
 
 export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, onDelete }: OlympiadCardProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   const startDate = parseISO(olympiad.startDate);
   const endDate = parseISO(olympiad.endDate);
   const isSameDay = olympiad.startDate === olympiad.endDate;
@@ -26,7 +46,13 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, o
     : `${format(startDate, "d MMM", { locale: ru })} — ${format(endDate, "d MMM yyyy", { locale: ru })}`;
 
   return (
-    <div className="card-olimpiad group animate-fade-in overflow-hidden">
+    <div
+      ref={ref}
+      className={cn(
+        "card-olimpiad group overflow-hidden transition-all duration-500 ease-out",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      )}
+    >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2 min-w-0 flex-wrap">
           <SubjectIcon subject={olympiad.subject} size="sm" />
