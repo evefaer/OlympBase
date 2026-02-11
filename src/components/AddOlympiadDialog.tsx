@@ -39,7 +39,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { SUBJECTS, GRADES, SCALES, Subject, Grade, Scale, Olympiad } from "@/data/olympiads";
-import { useCustomOlympiads } from "@/hooks/useCustomOlympiads";
 import { toast } from "sonner";
 
 const formSchema = z.object({
@@ -57,11 +56,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface AddOlympiadDialogProps {
   trigger?: React.ReactNode;
+  onAdd: (olympiad: Omit<Olympiad, "id">) => void;
 }
 
-export function AddOlympiadDialog({ trigger }: AddOlympiadDialogProps) {
+export function AddOlympiadDialog({ trigger, onAdd }: AddOlympiadDialogProps) {
   const [open, setOpen] = useState(false);
-  const { addOlympiad } = useCustomOlympiads();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -90,7 +89,7 @@ export function AddOlympiadDialog({ trigger }: AddOlympiadDialogProps) {
       format: values.format || undefined,
     };
 
-    addOlympiad(olympiad);
+    onAdd(olympiad);
     toast.success("Олимпиада добавлена!");
     form.reset();
     setOpen(false);
