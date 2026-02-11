@@ -8,6 +8,7 @@ import { AddOlympiadDialog } from "@/components/AddOlympiadDialog";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
 import { useOlympiads } from "@/hooks/useOlympiads";
 import { useCustomOlympiads } from "@/hooks/useCustomOlympiads";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { Subject, Grade, Scale } from "@/data/olympiads";
 import { parseISO, isWithinInterval, isAfter, isBefore, startOfDay } from "date-fns";
 
@@ -99,6 +100,8 @@ const ListPage = () => {
       .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
   }, [olympiadsData, selectedSubjects, selectedGrades, selectedScales, viewMode, dateRange, searchQuery, timeFilter, isSelected, isCustomOlympiad]);
 
+  const { visibleItems, hasMore, sentinelRef } = useInfiniteScroll(filteredOlympiads, 20);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -144,28 +147,35 @@ const ListPage = () => {
             ))}
           </div>
         ) : filteredOlympiads.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {filteredOlympiads.map((olympiad) => (
-              <OlympiadCard
-                key={olympiad.id}
-                olympiad={olympiad}
-                isSelected={isSelected(olympiad.id)}
-                onToggleSelect={toggleSelected}
-                isCustom={isCustomOlympiad(olympiad.id)}
-                onDelete={deleteOlympiad}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {visibleItems.map((olympiad) => (
+                <OlympiadCard
+                  key={olympiad.id}
+                  olympiad={olympiad}
+                  isSelected={isSelected(olympiad.id)}
+                  onToggleSelect={toggleSelected}
+                  isCustom={isCustomOlympiad(olympiad.id)}
+                  onDelete={deleteOlympiad}
+                />
+              ))}
+              {hasMore && (
+                <>
+                  <OlympiadCardSkeleton />
+                  <OlympiadCardSkeleton />
+                  <OlympiadCardSkeleton />
+                </>
+              )}
+            </div>
+            <div ref={sentinelRef} className="h-1" />
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+              Показано {visibleItems.length} из {filteredOlympiads.length}
+            </div>
+          </>
         ) : (
           <div className="text-center py-12 text-muted-foreground animate-fade-in">
             <p className="text-lg">Нет олимпиад по выбранным фильтрам</p>
             <p className="text-sm mt-1">Попробуйте изменить параметры поиска</p>
-          </div>
-        )}
-
-        {filteredOlympiads.length > 0 && (
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            Найдено олимпиад: {filteredOlympiads.length}
           </div>
         )}
       </main>
