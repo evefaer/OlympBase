@@ -48,7 +48,7 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, o
                 e.stopPropagation();
                 onDelete(olympiad.id);
               }}
-              className="p-1.5 rounded-lg bg-secondary text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+              className="p-2 sm:p-1.5 rounded-lg bg-secondary text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
               aria-label="Удалить олимпиаду"
             >
               <Trash2 className="w-4 h-4" />
@@ -59,7 +59,7 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, o
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="p-1.5 rounded-lg bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+            className="p-2 sm:p-1.5 rounded-lg bg-secondary text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
             aria-label="Добавить в Google Calendar"
           >
             <CalendarPlus className="w-4 h-4" />
@@ -71,7 +71,7 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, o
               onToggleSelect(olympiad.id);
             }}
             className={cn(
-              "p-1.5 rounded-lg transition-all",
+              "p-2 sm:p-1.5 rounded-lg transition-all",
               isSelected
                 ? "bg-warning/10 text-warning"
                 : "bg-secondary text-muted-foreground hover:text-warning hover:bg-warning/10"

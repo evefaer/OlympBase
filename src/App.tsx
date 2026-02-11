@@ -9,6 +9,7 @@ import CalendarPage from "./pages/CalendarPage";
 import ListPage from "./pages/ListPage";
 import OlympiadPage from "./pages/OlympiadPage";
 import NotFound from "./pages/NotFound";
+import { MobileBottomNav } from "./components/MobileBottomNav";
 
 const queryClient = new QueryClient();
 
@@ -19,13 +20,16 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/list" element={<ListPage />} />
-          <Route path="/olympiad/:id" element={<OlympiadPage />} />
-          <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="pb-14 md:pb-0">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/list" element={<ListPage />} />
+              <Route path="/olympiad/:id" element={<OlympiadPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+          <MobileBottomNav />
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
