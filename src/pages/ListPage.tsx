@@ -23,7 +23,7 @@ const ListPage = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("upcoming");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
-  const { isCustomOlympiad, deleteOlympiad, customOlympiads } = useCustomOlympiads();
+  const { isCustomOlympiad, deleteOlympiad, addOlympiad, customOlympiads } = useCustomOlympiads();
   const { data: olympiadsData = [], isLoading } = useOlympiads(customOlympiads);
 
   const filteredOlympiads = useMemo(() => {
@@ -113,7 +113,7 @@ const ListPage = () => {
               Найдите олимпиады по вашим интересам
             </p>
           </div>
-          <AddOlympiadDialog />
+          <AddOlympiadDialog onAdd={addOlympiad} />
         </div>
 
         <FilterPanel

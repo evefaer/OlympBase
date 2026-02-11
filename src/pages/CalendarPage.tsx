@@ -19,7 +19,7 @@ const CalendarPage = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
-  const { isCustomOlympiad, customOlympiads } = useCustomOlympiads();
+  const { isCustomOlympiad, addOlympiad, customOlympiads } = useCustomOlympiads();
   const { data: olympiadsData = [], isLoading } = useOlympiads(customOlympiads);
 
   const filteredOlympiads = useMemo(() => {
@@ -88,7 +88,7 @@ const CalendarPage = () => {
               Планируйте участие и не пропускайте важные даты
             </p>
           </div>
-          <AddOlympiadDialog />
+          <AddOlympiadDialog onAdd={addOlympiad} />
         </div>
 
         <FilterPanel
