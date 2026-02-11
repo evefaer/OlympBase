@@ -45,17 +45,28 @@ export function useOlympiads(customOlympiads: Olympiad[] = []) {
   const query = useQuery({
     queryKey: ["olympiads"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("olympiads")
-        .select("*")
-        .order("start_date", { ascending: true });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
 
-      if (error) {
-        throw error;
+      try {
+        const { data, error } = await supabase
+          .from("olympiads")
+          .select("*")
+          .order("start_date", { ascending: true })
+          .abortSignal(controller.signal);
+
+        if (error) {
+          throw error;
+        }
+
+        return (data as OlympiadRow[]).map(mapRowToOlympiad);
+      } finally {
+        clearTimeout(timeout);
       }
-
-      return (data as OlympiadRow[]).map(mapRowToOlympiad);
     },
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
+    staleTime: 5 * 60 * 1000,
   });
 
   // Merge database olympiads with custom ones

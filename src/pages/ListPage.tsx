@@ -26,7 +26,7 @@ const ListPage = () => {
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
   const { isCustomOlympiad, deleteOlympiad, addOlympiad, customOlympiads } = useCustomOlympiads();
-  const { data: olympiadsData = [], isLoading } = useOlympiads(customOlympiads);
+  const { data: olympiadsData = [], isLoading, isError, refetch } = useOlympiads(customOlympiads);
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData
@@ -145,6 +145,17 @@ const ListPage = () => {
             {Array.from({ length: 6 }).map((_, i) => (
               <OlympiadCardSkeleton key={i} />
             ))}
+          </div>
+        ) : isError ? (
+          <div className="text-center py-12 animate-fade-in">
+            <p className="text-lg text-destructive mb-2">Не удалось загрузить олимпиады</p>
+            <p className="text-sm text-muted-foreground mb-4">Проверьте подключение к интернету</p>
+            <button
+              onClick={() => refetch()}
+              className="btn-primary-gradient px-6 py-2 text-sm"
+            >
+              Попробовать снова
+            </button>
           </div>
         ) : filteredOlympiads.length > 0 ? (
           <>
