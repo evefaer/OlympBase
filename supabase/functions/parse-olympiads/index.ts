@@ -110,12 +110,6 @@ function getMosOlympiadPages(): { url: string; subject: string }[] {
   ];
 }
 
-// rsr-olymp.ru — Перечень олимпиад РСОШ (single page)
-function getRsrPages(): { url: string; subject: string }[] {
-  return [
-    { url: 'https://rsr-olymp.ru/', subject: 'Все предметы' },
-  ];
-}
 
 const EXTRACT_PROMPT = `You are extracting olympiad/competition data from a Russian educational website. 
 Extract EVERY SINGLE olympiad or competition listed on this page. Do NOT skip any.
@@ -299,7 +293,6 @@ Deno.serve(async (req) => {
       'ucheba.ru': getUchebaPages(filterSubjects),
       'vos.olimpiada.ru': getVosPages(filterSubjects),
       'mos.olimpiada.ru': getMosOlympiadPages(),
-      'rsr-olymp.ru': getRsrPages(),
     };
 
     const activeSources = filterSource
