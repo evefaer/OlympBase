@@ -26,7 +26,7 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, o
     : `${format(startDate, "d MMM", { locale: ru })} — ${format(endDate, "d MMM yyyy", { locale: ru })}`;
 
   return (
-    <div className="card-olimpiad group animate-fade-in">
+    <div className="card-olimpiad group animate-fade-in overflow-hidden">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2 min-w-0 flex-wrap">
           <SubjectIcon subject={olympiad.subject} size="sm" />
@@ -84,7 +84,7 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, o
       </div>
 
       <Link to={`/olympiad/${olympiad.id}`}>
-        <h3 className="font-semibold text-foreground mb-2 leading-tight group-hover:text-primary transition-colors cursor-pointer">
+        <h3 className="font-semibold text-foreground mb-2 leading-tight group-hover:text-primary transition-colors cursor-pointer break-words overflow-hidden">
           {olympiad.title}
         </h3>
       </Link>
