@@ -277,39 +277,51 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Optional subject filter
+    // Optional filters
     let filterSubjects: string[] | undefined;
+    let filterSource: string | undefined;
     try {
       const body = await req.json();
       if (body.subjects && Array.isArray(body.subjects)) {
         filterSubjects = body.subjects;
       }
+      if (body.source && typeof body.source === 'string') {
+        filterSource = body.source;
+      }
     } catch {
       // no body
     }
 
-    const olimpiadaPages = getOlimpiadaPages(filterSubjects);
-    const postupiPages = getPostupiPages(filterSubjects);
-    const uchebaPages = getUchebaPages(filterSubjects);
-    const vosPages = getVosPages(filterSubjects);
-    const mosPages = getMosOlympiadPages();
-    const rsrPages = getRsrPages();
+    // Build pages based on source filter
+    const sourceMap: Record<string, { url: string; subject: string }[]> = {
+      'olimpiada.ru': getOlimpiadaPages(filterSubjects),
+      'postupi.online': getPostupiPages(filterSubjects),
+      'ucheba.ru': getUchebaPages(filterSubjects),
+      'vos.olimpiada.ru': getVosPages(filterSubjects),
+      'mos.olimpiada.ru': getMosOlympiadPages(),
+      'rsr-olymp.ru': getRsrPages(),
+    };
 
-    const totalPages = olimpiadaPages.length + postupiPages.length + uchebaPages.length + vosPages.length + mosPages.length + rsrPages.length;
-    console.log(`Total pages to scrape: ${totalPages} (olimpiada.ru: ${olimpiadaPages.length}, postupi.online: ${postupiPages.length}, ucheba.ru: ${uchebaPages.length}, vos.olimpiada.ru: ${vosPages.length}, mos.olimpiada.ru: ${mosPages.length}, rsr-olymp.ru: ${rsrPages.length})`);
+    const activeSources = filterSource
+      ? { [filterSource]: sourceMap[filterSource] || [] }
+      : sourceMap;
 
-    // Scrape all sources in parallel batches of 4
-    const [olimpiadaResults, postupiResults, uchebaResults, vosResults, mosResults, rsrResults] = await Promise.all([
-      scrapeInBatches(apiKey, olimpiadaPages, 4),
-      scrapeInBatches(apiKey, postupiPages, 4),
-      scrapeInBatches(apiKey, uchebaPages, 4),
-      scrapeInBatches(apiKey, vosPages, 4),
-      scrapeInBatches(apiKey, mosPages, 4),
-      scrapeInBatches(apiKey, rsrPages, 4),
-    ]);
+    let allOlympiads: ParsedOlympiad[] = [];
+    const sourceCounts: Record<string, number> = {};
+    let totalPages = 0;
 
-    const allOlympiads = [...olimpiadaResults, ...postupiResults, ...uchebaResults, ...vosResults, ...mosResults, ...rsrResults];
-    console.log(`Total scraped: ${allOlympiads.length} (olimpiada.ru: ${olimpiadaResults.length}, postupi.online: ${postupiResults.length}, ucheba.ru: ${uchebaResults.length}, vos: ${vosResults.length}, mos: ${mosResults.length}, rsr: ${rsrResults.length})`);
+    // Process sources SEQUENTIALLY to avoid timeouts
+    for (const [sourceName, pages] of Object.entries(activeSources)) {
+      if (pages.length === 0) continue;
+      totalPages += pages.length;
+      console.log(`Scraping ${sourceName}: ${pages.length} pages`);
+      const results = await scrapeInBatches(apiKey, pages, 3);
+      sourceCounts[sourceName] = results.length;
+      allOlympiads.push(...results);
+      console.log(`${sourceName}: found ${results.length} olympiads`);
+    }
+
+    console.log(`Total scraped: ${allOlympiads.length}`);
 
     // Validate: require at least title and some date
     const valid = allOlympiads.filter((o) => {
@@ -392,7 +404,8 @@ Deno.serve(async (req) => {
           cleaned: deletedCount || 0,
           alreadyExisted: unique.length - newOlympiads.length,
           bySubject,
-          sources: ['olimpiada.ru', 'postupi.online', 'ucheba.ru', 'vos.olimpiada.ru', 'mos.olimpiada.ru', 'rsr-olymp.ru'],
+          sources: Object.keys(activeSources),
+          sourceCounts,
           pagesScraped: totalPages,
           parsedAt: new Date().toISOString(),
         },
