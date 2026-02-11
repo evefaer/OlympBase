@@ -21,7 +21,7 @@ const CalendarPage = () => {
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
   const { isCustomOlympiad, addOlympiad, customOlympiads } = useCustomOlympiads();
-  const { data: olympiadsData = [], isLoading } = useOlympiads(customOlympiads);
+  const { data: olympiadsData = [], isLoading, isError, refetch } = useOlympiads(customOlympiads);
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData.filter((olympiad) => {
@@ -111,6 +111,17 @@ const CalendarPage = () => {
 
         {isLoading ? (
           <CalendarSkeleton />
+        ) : isError ? (
+          <div className="text-center py-12 animate-fade-in">
+            <p className="text-lg text-destructive mb-2">Не удалось загрузить олимпиады</p>
+            <p className="text-sm text-muted-foreground mb-4">Проверьте подключение к интернету</p>
+            <button
+              onClick={() => refetch()}
+              className="btn-primary-gradient px-6 py-2 text-sm"
+            >
+              Попробовать снова
+            </button>
+          </div>
         ) : (
           <>
             <CalendarView
