@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { FilterPanel, TimeFilter, ViewMode } from "@/components/FilterPanel";
 import { OlympiadCard } from "@/components/OlympiadCard";
+import { OlympiadCardSkeleton } from "@/components/OlympiadCardSkeleton";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { AddOlympiadDialog } from "@/components/AddOlympiadDialog";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
@@ -137,8 +138,10 @@ const ListPage = () => {
         />
 
         {isLoading ? (
-          <div className="text-center py-12 text-muted-foreground animate-fade-in">
-            <p className="text-lg">Загрузка олимпиад...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <OlympiadCardSkeleton key={i} />
+            ))}
           </div>
         ) : filteredOlympiads.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
