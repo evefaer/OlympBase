@@ -26,19 +26,19 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, o
     : `${format(startDate, "d MMM", { locale: ru })} — ${format(endDate, "d MMM yyyy", { locale: ru })}`;
 
   return (
-    <div className="card-olimpiad group animate-fade-in relative">
-      {isCustom && (
-        <Badge variant="secondary" className="absolute top-2 right-2 text-xs gap-1">
-          <User className="w-3 h-3" />
-          Моя
-        </Badge>
-      )}
+    <div className="card-olimpiad group animate-fade-in">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
           <SubjectIcon subject={olympiad.subject} size="sm" />
           <span className="text-sm font-medium text-muted-foreground">
             {olympiad.subject}
           </span>
+          {isCustom && (
+            <Badge variant="secondary" className="text-xs gap-1">
+              <User className="w-3 h-3" />
+              Моя
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-1">
           {isCustom && onDelete && (
