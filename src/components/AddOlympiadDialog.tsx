@@ -105,7 +105,7 @@ export function AddOlympiadDialog({ trigger, onAdd }: AddOlympiadDialogProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto mx-3 sm:mx-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-3 sm:mx-auto w-[calc(100%-1.5rem)]">
         <DialogHeader>
           <DialogTitle>Добавить свою олимпиаду</DialogTitle>
         </DialogHeader>

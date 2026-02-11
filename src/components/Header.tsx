@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Rocket, Calendar, List, Moon, Sun, Menu, X, Bell, BellRing } from "lucide-react";
+import { Rocket, Calendar, List, Moon, Sun, Bell, BellRing } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,6 @@ const navItems = [
 export function Header() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { mode, toggleMode } = useNotificationMode();
 
   const handleToggleMode = () => {
@@ -29,7 +27,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-md" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="container flex h-14 sm:h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <div className="icon-box-outline w-8 h-8 sm:w-9 sm:h-9">
@@ -123,44 +121,9 @@ export function Header() {
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="rounded-lg h-9 w-9"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-border bg-card animate-fade-in">
-          <nav className="container py-3 flex flex-col gap-1">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    "px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-3",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground hover:bg-secondary"
-                  )}
-                >
-                  {item.icon && <item.icon className="w-4 h-4" />}
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      )}
     </header>
   );
 }
