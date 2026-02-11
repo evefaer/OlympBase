@@ -28,19 +28,19 @@ export function OlympiadCard({ olympiad, isSelected, onToggleSelect, isCustom, o
   return (
     <div className="card-olimpiad group animate-fade-in">
       <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-wrap">
           <SubjectIcon subject={olympiad.subject} size="sm" />
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-sm font-medium text-muted-foreground truncate">
             {olympiad.subject}
           </span>
           {isCustom && (
-            <Badge variant="secondary" className="text-xs gap-1">
+            <Badge variant="secondary" className="text-xs gap-1 shrink-0">
               <User className="w-3 h-3" />
               Моя
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {isCustom && onDelete && (
             <button
               onClick={(e) => {
