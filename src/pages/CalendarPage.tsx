@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { FilterPanel, TimeFilter, ViewMode } from "@/components/FilterPanel";
 import { CalendarView } from "@/components/CalendarView";
-import { OlympiadCardSkeleton } from "@/components/OlympiadCardSkeleton";
+import { CalendarSkeleton } from "@/components/CalendarSkeleton";
 import { UpcomingReminder } from "@/components/UpcomingReminder";
 import { AddOlympiadDialog } from "@/components/AddOlympiadDialog";
 import { useSelectedOlympiads } from "@/hooks/useSelectedOlympiads";
@@ -110,11 +110,7 @@ const CalendarPage = () => {
         />
 
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <OlympiadCardSkeleton key={i} />
-            ))}
-          </div>
+          <CalendarSkeleton />
         ) : (
           <>
             <CalendarView
