@@ -10,6 +10,7 @@ import ListPage from "./pages/ListPage";
 import OlympiadPage from "./pages/OlympiadPage";
 import NotFound from "./pages/NotFound";
 import { MobileBottomNav } from "./components/MobileBottomNav";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             </Routes>
           </div>
           <MobileBottomNav />
+          <ScrollToTop />
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
