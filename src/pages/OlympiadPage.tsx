@@ -31,8 +31,8 @@ const OlympiadPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isSelected, toggleSelected } = useSelectedOlympiads();
-  const { data: olympiad, isLoading } = useOlympiad(id || "");
-  const { isCustomOlympiad, deleteOlympiad } = useCustomOlympiads();
+  const { isCustomOlympiad, deleteOlympiad, customOlympiads } = useCustomOlympiads();
+  const { data: olympiad, isLoading } = useOlympiad(id || "", customOlympiads);
   
   const isCustom = id ? isCustomOlympiad(id) : false;
 

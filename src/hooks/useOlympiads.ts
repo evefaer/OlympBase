@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Subject, Grade, Scale, Olympiad } from "@/data/olympiads";
-import { useCustomOlympiads } from "./useCustomOlympiads";
 import { useMemo } from "react";
 
 interface OlympiadRow {
@@ -42,9 +41,7 @@ function mapRowToOlympiad(row: OlympiadRow): Olympiad {
   };
 }
 
-export function useOlympiads() {
-  const { customOlympiads } = useCustomOlympiads();
-  
+export function useOlympiads(customOlympiads: Olympiad[] = []) {
   const query = useQuery({
     queryKey: ["olympiads"],
     queryFn: async () => {
@@ -75,9 +72,8 @@ export function useOlympiads() {
   };
 }
 
-export function useOlympiad(id: string) {
-  const { customOlympiads } = useCustomOlympiads();
-  
+export function useOlympiad(id: string, customOlympiads: Olympiad[] = []) {
+
   // Check if it's a custom olympiad first
   const customOlympiad = customOlympiads.find((o) => o.id === id);
   

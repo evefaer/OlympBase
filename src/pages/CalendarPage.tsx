@@ -19,8 +19,8 @@ const CalendarPage = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
-  const { data: olympiadsData = [], isLoading } = useOlympiads();
   const { isCustomOlympiad, customOlympiads } = useCustomOlympiads();
+  const { data: olympiadsData = [], isLoading } = useOlympiads(customOlympiads);
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData.filter((olympiad) => {
