@@ -23,8 +23,8 @@ const ListPage = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("upcoming");
 
   const { isSelected, toggleSelected, selectedCount } = useSelectedOlympiads();
-  const { data: olympiadsData = [], isLoading } = useOlympiads();
   const { isCustomOlympiad, deleteOlympiad, customOlympiads } = useCustomOlympiads();
+  const { data: olympiadsData = [], isLoading } = useOlympiads(customOlympiads);
 
   const filteredOlympiads = useMemo(() => {
     return olympiadsData
