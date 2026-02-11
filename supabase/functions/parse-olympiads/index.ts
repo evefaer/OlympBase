@@ -63,6 +63,60 @@ function getPostupiPages(filterSubjects?: string[]): { url: string; subject: str
   return pages;
 }
 
+// ucheba.ru slug mapping
+const UCHEBA_SUBJECTS: Record<string, string> = {
+  'mathematics': 'Математика', 'physics': 'Физика', 'informatics': 'Информатика',
+  'chemistry': 'Химия', 'biology': 'Биология', 'russian': 'Русский язык',
+  'literature': 'Литература', 'history': 'История', 'social-science': 'Обществознание',
+  'geography': 'География', 'english': 'Английский язык',
+  'economics': 'Экономика', 'law': 'Право', 'astronomy': 'Астрономия',
+  'ecology': 'Экология',
+};
+
+function getUchebaPages(filterSubjects?: string[]): { url: string; subject: string }[] {
+  const pages: { url: string; subject: string }[] = [];
+  for (const [slug, subject] of Object.entries(UCHEBA_SUBJECTS)) {
+    if (filterSubjects && !filterSubjects.includes(subject)) continue;
+    pages.push({ url: `https://www.ucheba.ru/for-abiturients/olympiads/${slug}`, subject });
+  }
+  return pages;
+}
+
+// vos.olimpiada.ru — ВсОШ subjects
+const VOS_SUBJECTS: Record<string, string> = {
+  'math': 'Математика', 'phys': 'Физика', 'inf': 'Информатика',
+  'chem': 'Химия', 'bio': 'Биология', 'rus': 'Русский язык',
+  'lit': 'Литература', 'hist': 'История', 'soc': 'Обществознание',
+  'geo': 'География', 'eng': 'Английский язык',
+  'econ': 'Экономика', 'law': 'Право', 'astr': 'Астрономия',
+  'ecol': 'Экология', 'nem': 'Немецкий язык', 'fr': 'Французский язык',
+  'chin': 'Китайский язык', 'art': 'Искусство', 'tech': 'Технология',
+  'obzh': 'ОБЖ', 'pe': 'Физкультура',
+};
+
+function getVosPages(filterSubjects?: string[]): { url: string; subject: string }[] {
+  const pages: { url: string; subject: string }[] = [];
+  for (const [slug, subject] of Object.entries(VOS_SUBJECTS)) {
+    if (filterSubjects && !filterSubjects.includes(subject)) continue;
+    pages.push({ url: `https://vos.olimpiada.ru/${slug}/2025_2026`, subject });
+  }
+  return pages;
+}
+
+// mos.olimpiada.ru — Московская олимпиада школьников (single schedule page)
+function getMosOlympiadPages(): { url: string; subject: string }[] {
+  return [
+    { url: 'https://mos.olimpiada.ru/schedule', subject: 'Все предметы' },
+  ];
+}
+
+// rsr-olymp.ru — Перечень олимпиад РСОШ (single page)
+function getRsrPages(): { url: string; subject: string }[] {
+  return [
+    { url: 'https://rsr-olymp.ru/', subject: 'Все предметы' },
+  ];
+}
+
 const EXTRACT_PROMPT = `You are extracting olympiad/competition data from a Russian educational website. 
 Extract EVERY SINGLE olympiad or competition listed on this page. Do NOT skip any.
 Look through the ENTIRE page content carefully — tables, lists, cards, links, sidebars.
@@ -236,17 +290,26 @@ Deno.serve(async (req) => {
 
     const olimpiadaPages = getOlimpiadaPages(filterSubjects);
     const postupiPages = getPostupiPages(filterSubjects);
+    const uchebaPages = getUchebaPages(filterSubjects);
+    const vosPages = getVosPages(filterSubjects);
+    const mosPages = getMosOlympiadPages();
+    const rsrPages = getRsrPages();
 
-    console.log(`Total pages to scrape: ${olimpiadaPages.length} olimpiada.ru + ${postupiPages.length} postupi.online = ${olimpiadaPages.length + postupiPages.length}`);
+    const totalPages = olimpiadaPages.length + postupiPages.length + uchebaPages.length + vosPages.length + mosPages.length + rsrPages.length;
+    console.log(`Total pages to scrape: ${totalPages} (olimpiada.ru: ${olimpiadaPages.length}, postupi.online: ${postupiPages.length}, ucheba.ru: ${uchebaPages.length}, vos.olimpiada.ru: ${vosPages.length}, mos.olimpiada.ru: ${mosPages.length}, rsr-olymp.ru: ${rsrPages.length})`);
 
-    // Scrape both sources in parallel batches of 4
-    const [olimpiadaResults, postupiResults] = await Promise.all([
+    // Scrape all sources in parallel batches of 4
+    const [olimpiadaResults, postupiResults, uchebaResults, vosResults, mosResults, rsrResults] = await Promise.all([
       scrapeInBatches(apiKey, olimpiadaPages, 4),
       scrapeInBatches(apiKey, postupiPages, 4),
+      scrapeInBatches(apiKey, uchebaPages, 4),
+      scrapeInBatches(apiKey, vosPages, 4),
+      scrapeInBatches(apiKey, mosPages, 4),
+      scrapeInBatches(apiKey, rsrPages, 4),
     ]);
 
-    const allOlympiads = [...olimpiadaResults, ...postupiResults];
-    console.log(`Total scraped: ${allOlympiads.length} (olimpiada.ru: ${olimpiadaResults.length}, postupi.online: ${postupiResults.length})`);
+    const allOlympiads = [...olimpiadaResults, ...postupiResults, ...uchebaResults, ...vosResults, ...mosResults, ...rsrResults];
+    console.log(`Total scraped: ${allOlympiads.length} (olimpiada.ru: ${olimpiadaResults.length}, postupi.online: ${postupiResults.length}, ucheba.ru: ${uchebaResults.length}, vos: ${vosResults.length}, mos: ${mosResults.length}, rsr: ${rsrResults.length})`);
 
     // Validate: require at least title and some date
     const valid = allOlympiads.filter((o) => {
@@ -329,8 +392,8 @@ Deno.serve(async (req) => {
           cleaned: deletedCount || 0,
           alreadyExisted: unique.length - newOlympiads.length,
           bySubject,
-          sources: ['olimpiada.ru', 'postupi.online'],
-          pagesScraped: olimpiadaPages.length + postupiPages.length,
+          sources: ['olimpiada.ru', 'postupi.online', 'ucheba.ru', 'vos.olimpiada.ru', 'mos.olimpiada.ru', 'rsr-olymp.ru'],
+          pagesScraped: totalPages,
           parsedAt: new Date().toISOString(),
         },
       }),
