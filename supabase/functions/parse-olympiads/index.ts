@@ -368,19 +368,23 @@ Deno.serve(async (req) => {
     const fresh = valid.filter((o) => !isOlderThanOneMonth(o.endDate));
     console.log(`Fresh (not older than 1 month): ${fresh.length}`);
 
-    // Deduplicate by normalized title
+    // Deduplicate using normalized title + composite key (subject+date+scale)
     const seen = new Set<string>();
     const unique = fresh.filter((o) => {
-      const key = o.title.toLowerCase().trim().replace(/\s+/g, ' ');
-      if (seen.has(key)) return false;
-      seen.add(key);
+      const keys = dedupKeys(o);
+      if (keys.some((k) => seen.has(k))) return false;
+      keys.forEach((k) => seen.add(k));
       return true;
     });
     console.log(`Unique: ${unique.length}`);
 
-    // Get existing titles
-    const { data: existing } = await supabase.from('olympiads').select('title');
-    const existingTitles = new Set((existing || []).map((o: { title: string }) => o.title.toLowerCase().trim().replace(/\s+/g, ' ')));
+    // Get existing titles and build dedup keys for DB records
+    const { data: existing } = await supabase.from('olympiads').select('title, subject, start_date, scale');
+    const existingKeys = new Set<string>();
+    (existing || []).forEach((o: { title: string; subject: string; start_date: string; scale: string }) => {
+      const keys = dedupKeys({ title: o.title, subject: o.subject, startDate: o.start_date, scale: o.scale });
+      keys.forEach((k) => existingKeys.add(k));
+    });
 
     const newOlympiads = unique
       .filter((o) => !existingTitles.has(o.title.toLowerCase().trim().replace(/\s+/g, ' ')))
