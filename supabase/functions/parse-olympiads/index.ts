@@ -387,7 +387,10 @@ Deno.serve(async (req) => {
     });
 
     const newOlympiads = unique
-      .filter((o) => !existingTitles.has(o.title.toLowerCase().trim().replace(/\s+/g, ' ')))
+      .filter((o) => {
+        const keys = dedupKeys(o);
+        return !keys.some((k) => existingKeys.has(k));
+      })
       .map((o) => ({
         title: o.title.trim(),
         subject: o.subject,
