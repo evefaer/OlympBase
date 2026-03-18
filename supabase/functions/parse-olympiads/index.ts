@@ -157,9 +157,49 @@ const EXTRACT_SCHEMA = {
   required: ['olympiads'],
 };
 
+// Known abbreviation mappings for title normalization
+const TITLE_ALIASES: [RegExp, string][] = [
+  [/\bвсош\b/gi, 'всероссийская олимпиада школьников'],
+  [/\bмош\b/gi, 'московская олимпиада школьников'],
+  [/\bвсероссийская олимпиада школьников/gi, 'всероссийская олимпиада школьников'],
+  [/\bмосковская олимпиада школьников/gi, 'московская олимпиада школьников'],
+  [/\bолимпиада школьников\b/gi, 'олимпиада школьников'],
+  [/\bвсерос\b/gi, 'всероссийская олимпиада школьников'],
+];
+
+// Strip noise words and normalize for comparison
+function normalizeTitle(title: string): string {
+  let t = title.toLowerCase().trim().replace(/\s+/g, ' ');
+  // Expand known abbreviations
+  for (const [pattern, replacement] of TITLE_ALIASES) {
+    t = t.replace(pattern, replacement);
+  }
+  // Remove quotes, brackets, year references, extra punctuation
+  t = t.replace(/[«»""']/g, '')
+       .replace(/\(\d{4}[\s/–-]*\d{0,4}\)/g, '')
+       .replace(/\d{4}[\s/–-]+\d{4}/g, '')
+       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+       .replace(/\s+/g, ' ')
+       .trim();
+  return t;
+}
+
+// Generate a composite dedup key: normalized title OR (subject + start_date + scale)
+function dedupKeys(o: { title: string; subject: string; startDate: string; scale: string }): string[] {
+  const keys: string[] = [];
+  keys.push(`title:${normalizeTitle(o.title)}`);
+  // Also add a composite key so same olympiad with different name is caught
+  if (o.subject && o.startDate) {
+    const subj = o.subject.toLowerCase().trim();
+    const scale = (o.scale || '').toLowerCase().trim();
+    keys.push(`composite:${subj}|${o.startDate}|${scale}`);
+  }
+  return keys;
+}
+
 function isOlderThanOneMonth(endDate: string): boolean {
   const end = new Date(endDate);
-  if (isNaN(end.getTime())) return false; // keep if date is unparseable
+  if (isNaN(end.getTime())) return false;
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 30);
   return end < cutoff;
