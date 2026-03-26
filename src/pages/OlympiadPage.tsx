@@ -139,11 +139,23 @@ const OlympiadPage = () => {
 
 
 
-                {olympiad.website && (
+                {olympiad.website ? (
                   <a href={olympiad.website} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
                     <Button variant="outline" className="gap-2 w-full">
                       <ExternalLink className="w-4 h-4" />
                       Сайт олимпиады
+                    </Button>
+                  </a>
+                ) : (
+                  <a
+                    href={`https://yandex.ru/search/?text=${encodeURIComponent(olympiad.title + ' олимпиада')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto"
+                  >
+                    <Button variant="outline" className="gap-2 w-full">
+                      <ExternalLink className="w-4 h-4" />
+                      Найти в интернете
                     </Button>
                   </a>
                 )}
