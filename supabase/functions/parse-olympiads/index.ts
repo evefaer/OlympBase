@@ -437,7 +437,7 @@ Deno.serve(async (req) => {
         end_date: o.endDate || o.startDate,
         registration_deadline: o.registrationDeadline || o.startDate,
         description: o.description || `Олимпиада по предмету ${o.subject}`,
-        website: o.website || null,
+        website: isValidWebsite(o.website),
         organizer: o.organizer || null,
         format: o.format || null,
       }));
