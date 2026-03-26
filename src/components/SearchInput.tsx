@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useOlympiads } from "@/hooks/useOlympiads";
 import { cn } from "@/lib/utils";
 import { SubjectIcon } from "@/components/SubjectIcon";
+import { useNavigate } from "react-router-dom";
 
 interface SearchInputProps {
   value: string;
@@ -16,6 +17,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const navigate = useNavigate();
   const { data: olympiadsData = [] } = useOlympiads();
 
   const suggestions = useMemo(() => {
@@ -55,7 +57,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
       case "Enter":
         e.preventDefault();
         if (highlightedIndex >= 0 && suggestions[highlightedIndex]) {
-          onChange(suggestions[highlightedIndex].title);
+          navigate(`/olympiad/${suggestions[highlightedIndex].id}`);
           setIsOpen(false);
         }
         break;
@@ -65,10 +67,9 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
     }
   };
 
-  const handleSelect = (title: string) => {
-    onChange(title);
+  const handleSelect = (id: string) => {
+    navigate(`/olympiad/${id}`);
     setIsOpen(false);
-    inputRef.current?.focus();
   };
 
   const handleClear = () => {
@@ -111,7 +112,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
           {suggestions.map((olympiad, index) => (
             <li key={olympiad.id}>
               <button
-                onClick={() => handleSelect(olympiad.title)}
+                onClick={() => handleSelect(olympiad.id)}
                 onMouseEnter={() => setHighlightedIndex(index)}
                 className={cn(
                   "w-full px-3 py-2.5 text-left flex items-center gap-3 transition-colors",
