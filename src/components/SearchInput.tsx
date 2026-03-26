@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useOlympiads } from "@/hooks/useOlympiads";
 import { cn } from "@/lib/utils";
 import { SubjectIcon } from "@/components/SubjectIcon";
+import { useNavigate } from "react-router-dom";
 
 interface SearchInputProps {
   value: string;
