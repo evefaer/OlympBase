@@ -55,6 +55,7 @@ export function FilterPanel({
   searchQuery = "",
   onSearchChange,
   timeFilter = "all",
+  defaultTimeFilter = "upcoming",
   onTimeFilterChange,
 }: FilterPanelProps) {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
