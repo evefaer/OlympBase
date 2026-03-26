@@ -34,6 +34,7 @@ interface FilterPanelProps {
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
   timeFilter?: TimeFilter;
+  defaultTimeFilter?: TimeFilter;
   onTimeFilterChange?: (filter: TimeFilter) => void;
 }
 
@@ -54,6 +55,7 @@ export function FilterPanel({
   searchQuery = "",
   onSearchChange,
   timeFilter = "all",
+  defaultTimeFilter = "upcoming",
   onTimeFilterChange,
 }: FilterPanelProps) {
   const [openFilter, setOpenFilter] = useState<string | null>(null);
@@ -93,7 +95,7 @@ export function FilterPanel({
       onSearchChange("");
     }
     if (onTimeFilterChange) {
-      onTimeFilterChange("upcoming");
+      onTimeFilterChange(defaultTimeFilter);
     }
   };
 
@@ -103,7 +105,7 @@ export function FilterPanel({
     selectedScales.length > 0 ||
     (dateRange?.from || dateRange?.to) ||
     searchQuery.trim().length > 0 ||
-    (timeFilter !== "all" && timeFilter !== "upcoming");
+    (timeFilter !== "all" && timeFilter !== defaultTimeFilter);
 
   return (
     <div className="bg-card rounded-xl border border-border p-3 sm:p-4 mb-4 sm:mb-6 animate-fade-in">

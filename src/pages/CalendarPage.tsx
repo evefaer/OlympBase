@@ -106,6 +106,7 @@ const CalendarPage = () => {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           timeFilter={timeFilter}
+          defaultTimeFilter="all"
           onTimeFilterChange={setTimeFilter}
         />
 
