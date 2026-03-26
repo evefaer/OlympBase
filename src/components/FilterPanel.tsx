@@ -105,7 +105,7 @@ export function FilterPanel({
     selectedScales.length > 0 ||
     (dateRange?.from || dateRange?.to) ||
     searchQuery.trim().length > 0 ||
-    (timeFilter !== "all" && timeFilter !== "upcoming");
+    (timeFilter !== "all" && timeFilter !== defaultTimeFilter);
 
   return (
     <div className="bg-card rounded-xl border border-border p-3 sm:p-4 mb-4 sm:mb-6 animate-fade-in">
