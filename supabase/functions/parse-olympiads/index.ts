@@ -356,6 +356,30 @@ Deno.serve(async (req) => {
 
     console.log(`Total scraped: ${allOlympiads.length}`);
 
+    // Validate website URLs
+    function isValidWebsite(url: string | null): string | null {
+      if (!url) return null;
+      let u = url.trim();
+      if (!u) return null;
+      // Must start with http(s)
+      if (!u.startsWith('http://') && !u.startsWith('https://')) {
+        u = 'https://' + u;
+      }
+      try {
+        const parsed = new URL(u);
+        // Must have a valid hostname with a dot
+        if (!parsed.hostname.includes('.')) return null;
+        // Reject common garbage
+        if (parsed.hostname === 'localhost') return null;
+        if (/^[\d.]+$/.test(parsed.hostname)) return null; // bare IPs
+        // Reject extremely short hostnames
+        if (parsed.hostname.length < 4) return null;
+        return parsed.href;
+      } catch {
+        return null;
+      }
+    }
+
     // Validate: require at least title and some date; reject catalog/list URLs
     const CATALOG_URL_PATTERNS = [
       /\/olimpiady\//i,
@@ -365,6 +389,14 @@ Deno.serve(async (req) => {
       /\/for-abiturients\/olympiads\/[a-z-]+$/i, // ucheba.ru subject catalog pages
     ];
 
+    // Patterns for generic/catalog URLs that aren't direct olympiad pages
+    const GENERIC_URL_PATTERNS = [
+      /postupi\.online\/olimpiada\//i,
+      /mos\.olimpiada\.ru\/olymp\//i,
+      /vos\.olimpiada\.ru\//i,
+      /olimpiada\.ru\/[a-z-]+$/i, // generic subject pages like olimpiada.ru/chemistry
+    ];
+
     const valid = allOlympiads.filter((o) => {
       if (!o.title || o.title.length < 3) return false;
       if (!o.startDate && !o.endDate) return false;
@@ -372,6 +404,13 @@ Deno.serve(async (req) => {
       if (o.website && CATALOG_URL_PATTERNS.some((p) => p.test(o.website!))) {
         console.log(`Skipping catalog entry: "${o.title}" → ${o.website}`);
         return false;
+      }
+      // Validate and clean website URL
+      o.website = isValidWebsite(o.website);
+      // Null out generic/non-specific URLs
+      if (o.website && GENERIC_URL_PATTERNS.some((p) => p.test(o.website!))) {
+        console.log(`Nulling generic URL: "${o.title}" → ${o.website}`);
+        o.website = null;
       }
       return true;
     });
@@ -413,7 +452,7 @@ Deno.serve(async (req) => {
         end_date: o.endDate || o.startDate,
         registration_deadline: o.registrationDeadline || o.startDate,
         description: o.description || `Олимпиада по предмету ${o.subject}`,
-        website: o.website || null,
+        website: isValidWebsite(o.website),
         organizer: o.organizer || null,
         format: o.format || null,
       }));
