@@ -57,7 +57,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
       case "Enter":
         e.preventDefault();
         if (highlightedIndex >= 0 && suggestions[highlightedIndex]) {
-          onChange(suggestions[highlightedIndex].title);
+          navigate(`/olympiad/${suggestions[highlightedIndex].id}`);
           setIsOpen(false);
         }
         break;
