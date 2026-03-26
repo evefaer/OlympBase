@@ -17,6 +17,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const navigate = useNavigate();
   const { data: olympiadsData = [] } = useOlympiads();
 
   const suggestions = useMemo(() => {
