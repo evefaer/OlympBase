@@ -1,0 +1,1 @@
+DELETE FROM olympiads WHERE website LIKE '%/olimpiady/%' OR website LIKE '%/activities/%' OR website LIKE '%/activities?%';

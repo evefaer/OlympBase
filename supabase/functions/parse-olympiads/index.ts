@@ -356,10 +356,23 @@ Deno.serve(async (req) => {
 
     console.log(`Total scraped: ${allOlympiads.length}`);
 
-    // Validate: require at least title and some date
+    // Validate: require at least title and some date; reject catalog/list URLs
+    const CATALOG_URL_PATTERNS = [
+      /\/olimpiady\//i,
+      /\/activities\//i,
+      /\/activities\?/i,
+      /predmet-/i,
+      /\/for-abiturients\/olympiads\/[a-z-]+$/i, // ucheba.ru subject catalog pages
+    ];
+
     const valid = allOlympiads.filter((o) => {
       if (!o.title || o.title.length < 3) return false;
       if (!o.startDate && !o.endDate) return false;
+      // Reject entries whose website points to a catalog/list page
+      if (o.website && CATALOG_URL_PATTERNS.some((p) => p.test(o.website!))) {
+        console.log(`Skipping catalog entry: "${o.title}" → ${o.website}`);
+        return false;
+      }
       return true;
     });
     console.log(`Valid: ${valid.length}`);
