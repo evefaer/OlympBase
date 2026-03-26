@@ -112,7 +112,7 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
           {suggestions.map((olympiad, index) => (
             <li key={olympiad.id}>
               <button
-                onClick={() => handleSelect(olympiad.title)}
+                onClick={() => handleSelect(olympiad.id)}
                 onMouseEnter={() => setHighlightedIndex(index)}
                 className={cn(
                   "w-full px-3 py-2.5 text-left flex items-center gap-3 transition-colors",
