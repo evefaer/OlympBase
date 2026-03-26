@@ -356,6 +356,30 @@ Deno.serve(async (req) => {
 
     console.log(`Total scraped: ${allOlympiads.length}`);
 
+    // Validate website URLs
+    function isValidWebsite(url: string | null): string | null {
+      if (!url) return null;
+      let u = url.trim();
+      if (!u) return null;
+      // Must start with http(s)
+      if (!u.startsWith('http://') && !u.startsWith('https://')) {
+        u = 'https://' + u;
+      }
+      try {
+        const parsed = new URL(u);
+        // Must have a valid hostname with a dot
+        if (!parsed.hostname.includes('.')) return null;
+        // Reject common garbage
+        if (parsed.hostname === 'localhost') return null;
+        if (/^[\d.]+$/.test(parsed.hostname)) return null; // bare IPs
+        // Reject extremely short hostnames
+        if (parsed.hostname.length < 4) return null;
+        return parsed.href;
+      } catch {
+        return null;
+      }
+    }
+
     // Validate: require at least title and some date; reject catalog/list URLs
     const CATALOG_URL_PATTERNS = [
       /\/olimpiady\//i,
