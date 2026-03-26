@@ -34,6 +34,7 @@ interface FilterPanelProps {
   searchQuery?: string;
   onSearchChange?: (query: string) => void;
   timeFilter?: TimeFilter;
+  defaultTimeFilter?: TimeFilter;
   onTimeFilterChange?: (filter: TimeFilter) => void;
 }
 
