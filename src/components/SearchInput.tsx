@@ -67,10 +67,9 @@ export function SearchInput({ value, onChange, placeholder = "Поиск оли�
     }
   };
 
-  const handleSelect = (title: string) => {
-    onChange(title);
+  const handleSelect = (id: string) => {
+    navigate(`/olympiad/${id}`);
     setIsOpen(false);
-    inputRef.current?.focus();
   };
 
   const handleClear = () => {
